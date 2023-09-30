@@ -21,6 +21,8 @@ interface ButtonsProps {
   setIsChat: Dispatch<SetStateAction<boolean>>;
   isList: boolean;
   setIsList: Dispatch<SetStateAction<boolean>>;
+  roomID: string | null;
+  userID: string | null;
 }
 
 export default function ButtonsRow({
@@ -28,11 +30,14 @@ export default function ButtonsRow({
   setIsChat,
   isList,
   setIsList,
+  roomID,
+  userID,
 }: ButtonsProps) {
   const [mic, setMic] = useState(false);
   const [camera, setCamera] = useState(false);
   const [caption, setCaption] = useState(false);
   const [screenShare, setScreenShare] = useState(false);
+  const [infoVisible, setInfoVisible] = useState(false);
 
   return (
     <div className="flex flex-row-reverse justify-between items-center p-4">
@@ -53,9 +58,18 @@ export default function ButtonsRow({
         >
           <PeopleAltOutlined />
         </button>
-        <button className="text-gray-600">
+        <button
+          onClick={() => setInfoVisible((prev) => !prev)}
+          className="text-gray-600"
+        >
           <InfoOutlined />
         </button>
+        {infoVisible && (
+          <div className="absolute bottom-24 right-0 w-60 bg-white p-4 shadow-lg">
+            {userID &&<h1>{`${userID}'s meeting`}</h1>}
+            <p className="text-gray-800">Room ID: {roomID}</p>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-1 justify-around items-center ">

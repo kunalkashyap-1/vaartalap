@@ -8,19 +8,26 @@ export default function Home() {
   const [code, setCode] = useState<string>("");
   const { push } = useRouter();
 
+  const handleRoom = () => {
+    const fourDigit = Math.floor(Math.random() * 10000);
+    push(`/room?roomID=${fourDigit}`);
+  };
+
   return (
     <div className="bg-gray-100 h-screen">
       <nav className="navbar bg-white flex justify-between p-4 items-center">
-        <div className="flex cursor-pointer" onClick={(e) => {push("/")}}>
+        <div
+          className="flex cursor-pointer"
+          onClick={(e) => {
+            push("/");
+          }}
+        >
           <Image alt="logo" width={40} height={40} src="/logo.png" />
           <h1 className="text-3xl ml-2 font-semibold">Echo</h1>
         </div>
         <button
           className="bg-purple-700 font-semibold rounded-lg p-3 text-white hover:bg-purple-600 transition-colors"
-          onClick={(e) => {
-            const fourDigit = Math.floor(Math.random() * 10000);
-            push(`/room?roomID=${fourDigit}`);
-          }}
+          onClick={handleRoom}
         >
           Start a meeting
         </button>
@@ -35,12 +42,9 @@ export default function Home() {
               <div className="flex gap-6 items-center">
                 <button
                   className="bg-purple-700 rounded-lg p-3 text-white hover:bg-purple-600 transition-colors"
-                  onClick={(e) => {
-                    const fourDigit = Math.floor(Math.random() * 10000);
-                    push(`/room?roomID=${fourDigit}`);
-                  }}
+                  onClick={handleRoom}
                 >
-                  Start a meeting
+                  Create instant meeting
                 </button>
                 <input
                   className="rounded-xl p-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -60,7 +64,13 @@ export default function Home() {
                 </button>
               </div>
             </div>
-            <Image className="floating" alt="" width={500} height={500} src="/vector.png" />
+            <Image
+              className="floating"
+              alt=""
+              width={500}
+              height={500}
+              src="/vector.png"
+            />
           </div>
         </div>
       </main>
