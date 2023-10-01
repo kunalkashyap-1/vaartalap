@@ -5,11 +5,9 @@ import ParticipantsList from "../../components/participants";
 import VideoContainer from "../../components/videoContainer";
 import ButtonsRow from "../../components/buttonsRow";
 import { useSearchParams } from "next/navigation";
-import { io } from "socket.io-client";
+import { SocketProvider } from "../../components/socketProvider";
 
-//use env variable next time for now hard coded 
-const ENDPOINT = "localhost:8383"
-let socket;
+
 const Room = () => {
   const [isChat, setIsChat] = useState<boolean>(false);
   const [isList, setIsList] = useState<boolean>(false);
@@ -32,18 +30,12 @@ const Room = () => {
     getUserID();
   }, []);
 
-  useEffect(() => {
-    if (userID) {
-      socket = io(ENDPOINT);
-      socket.emit("connected", { roomID, userID });
-    }
-    //eslint-disable-next-line
-  }, [userID]);
 
   return (
+    <SocketProvider>
     <div className="room flex flex-col h-screen">
       <div className="flex flex-1">
-        <VideoContainer />
+        <VideoContainer roomID={roomID} userID={userID} />
         <ParticipantsList isList={isList} setIsList={setIsList} />
         <ChatBox isChat={isChat} setIsChat={setIsChat} />
       </div>
@@ -56,6 +48,7 @@ const Room = () => {
         userID={userID}
       />
     </div>
+    </SocketProvider>
   );
 };
 
