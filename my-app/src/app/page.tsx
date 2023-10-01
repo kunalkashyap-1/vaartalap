@@ -9,8 +9,8 @@ export default function Home() {
   const { push } = useRouter();
 
   const handleRoom = () => {
-    const fourDigit = Math.floor(Math.random() * 10000);
-    push(`/room?roomID=${fourDigit}`);
+    const fourDigit = Math.floor((Math.random() * 4)*10000);
+    window.location.replace(`/room?roomID=${fourDigit}`);
   };
 
   return (

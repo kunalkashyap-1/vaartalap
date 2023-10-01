@@ -22,6 +22,8 @@ const Room = () => {
 
         if (!inputUserID) {
           alert("UserID is missing");
+          window.location.replace("/");
+          break;
         }
       }
       setUserID(inputUserID);

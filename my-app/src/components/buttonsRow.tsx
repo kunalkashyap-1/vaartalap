@@ -15,6 +15,7 @@ import {
   MessageOutlined,
   PeopleAltOutlined,
 } from "@mui/icons-material";
+import { useSocket } from "./socketProvider";
 
 interface ButtonsProps {
   isChat: boolean;
@@ -33,11 +34,17 @@ export default function ButtonsRow({
   roomID,
   userID,
 }: ButtonsProps) {
-  const [mic, setMic] = useState(false);
-  const [camera, setCamera] = useState(false);
-  const [caption, setCaption] = useState(false);
-  const [screenShare, setScreenShare] = useState(false);
   const [infoVisible, setInfoVisible] = useState(false);
+  const {
+    mic,
+    setMic,
+    camera,
+    setCamera,
+    caption,
+    setCaption,
+    screenShare,
+    setScreenShare,
+  } = useSocket();
 
   return (
     <div className="flex flex-row-reverse justify-between items-center p-4">
@@ -66,7 +73,7 @@ export default function ButtonsRow({
         </button>
         {infoVisible && (
           <div className="absolute bottom-24 right-0 w-60 bg-white p-4 shadow-lg">
-            {userID &&<h1>{`${userID}'s meeting`}</h1>}
+            {userID && <h1>{`${userID}'s meeting`}</h1>}
             <p className="text-gray-800">Room ID: {roomID}</p>
           </div>
         )}
@@ -77,18 +84,18 @@ export default function ButtonsRow({
           <button
             onClick={() => setMic((prevMic) => !prevMic)}
             className={`${
-              !mic ? "bg-gray-300" : "bg-red-500 text-white"
+              mic ? "bg-gray-300" : "bg-red-500 text-white"
             }  place-content-center rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
           >
-            {!mic ? <MicNoneOutlined /> : <MicOffOutlined />}
+            {mic ? <MicNoneOutlined /> : <MicOffOutlined />}
           </button>
           <button
             onClick={() => setCamera((prevCamera) => !prevCamera)}
             className={`${
-              !camera ? "bg-gray-300" : "bg-red-500 text-white"
+              camera ? "bg-gray-300" : "bg-red-500 text-white"
             }  rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
           >
-            {!camera ? <VideocamOutlined /> : <VideocamOffOutlined />}
+            {camera ? <VideocamOutlined /> : <VideocamOffOutlined />}
           </button>
           <button
             onClick={() => setScreenShare((prevShare) => !prevShare)}
@@ -115,7 +122,7 @@ export default function ButtonsRow({
             )}
           </button>
           <button
-            onClick={() => {} /* Implement your logic for ending the call */}
+            onClick={() => {window.location.replace("/")} /* Implement your logic for ending the call */}
             className="bg-red-500 text-white rounded-full p-3 hover:bg-opacity-80 transition duration-300"
           >
             <CallEndOutlined />
