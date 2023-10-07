@@ -13,6 +13,6 @@ const io = require("socket.io")(server, {
 
 io.on("connection", (socket) => {
   socket.on("connected",({roomID, userID})=>{
-    console.log(roomID, userID);
+    // console.log(roomID, userID);
   })
 });
