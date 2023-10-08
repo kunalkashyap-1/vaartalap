@@ -21,6 +21,20 @@ interface ISocketContext {
   setCaption: Dispatch<SetStateAction<boolean>>;
   screenShare: boolean;
   setScreenShare: Dispatch<SetStateAction<boolean>>;
+  participantList: {
+    connID: string;
+    userID: string;
+    roomID: string;
+  }[];
+  setParticipantList: Dispatch<
+    SetStateAction<
+      {
+        connID: string;
+        userID: string;
+        roomID: string;
+      }[]
+    >
+  >;
 }
 
 interface SocketProviderProps {
@@ -37,6 +51,8 @@ const SocketContext = createContext<ISocketContext>({
   setCaption: () => {},
   screenShare: false,
   setScreenShare: () => {},
+  participantList: [],
+  setParticipantList: () => {},
 });
 
 export const useSocket = () => {
@@ -49,6 +65,13 @@ export const SocketProvider: FC<SocketProviderProps> = ({ children }) => {
   const [camera, setCamera] = useState(false);
   const [caption, setCaption] = useState(false);
   const [screenShare, setScreenShare] = useState(false);
+  const [participantList, setParticipantList] = useState<
+    {
+      connID: string;
+      userID: string;
+      roomID: string;
+    }[]
+  >([]);
 
   return (
     <SocketContext.Provider
@@ -62,6 +85,8 @@ export const SocketProvider: FC<SocketProviderProps> = ({ children }) => {
         setCaption,
         screenShare,
         setScreenShare,
+        participantList,
+        setParticipantList,
       }}
     >
       {children}

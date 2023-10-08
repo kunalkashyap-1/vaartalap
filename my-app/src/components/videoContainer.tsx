@@ -39,6 +39,11 @@ const VideoContainer = ({ roomID, userID }: VideoProps) => {
         ? await navigator.mediaDevices.getUserMedia({ video: true })
         : null;
 
+      if (!camera) {
+        // If camera is turned off, stop the video track
+        videoStream?.getTracks().forEach((track) => track.stop());
+      }
+
       // Combine audio and video streams into one stream
       const streamsToCombine: MediaStream[] = [];
 
@@ -52,14 +57,6 @@ const VideoContainer = ({ roomID, userID }: VideoProps) => {
 
       const combinedStream = new MediaStream();
 
-      if (!camera) {
-        // If camera is turned off, stop the video track
-        const videoTrack = combinedStream.getVideoTracks()[0];
-        if (videoTrack) {
-          videoTrack.stop();
-        }
-      }
-
       for (const stream of streamsToCombine) {
         stream.getTracks().forEach((track) => {
           combinedStream.addTrack(track);
@@ -70,20 +67,23 @@ const VideoContainer = ({ roomID, userID }: VideoProps) => {
 
       // Set the user's video stream
       streamVideo(userVideoRef, combinedStream);
-
-      // Check if a socket connection exists
-      if (socket) {
-        // Emit a "connected" event with roomID and userID
-        socket.emit("connected", { roomID, userID });
-
-        // Emit a "join room" event with roomID
-        socket.emit("join room", roomID);
-      }
     };
 
     // Call getUserMediaAndConnect whenever mic or camera changes
     getUserMediaAndConnect();
-  }, [roomID, userID, mic, camera, socket]);
+  }, [mic, camera]);
+
+  useEffect(() => {
+    // Check if a socket connection exists
+    if (socket) {
+      // Emit a "connected" event with roomID and userID
+      socket.emit("userConnected", { roomID, userID });
+
+      // Emit a "join room" event with roomID
+      socket.emit("join room", roomID);
+      socket.emit("hello",{greeting:"hello"});
+    }
+  }, [roomID, userID]);
 
   return (
     <div className="flex justify-center items-center flex-1">

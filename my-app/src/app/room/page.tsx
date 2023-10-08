@@ -7,7 +7,6 @@ import ButtonsRow from "../../components/buttonsRow";
 import { useSearchParams } from "next/navigation";
 import { SocketProvider } from "../../components/socketProvider";
 
-
 const Room = () => {
   const [isChat, setIsChat] = useState<boolean>(false);
   const [isList, setIsList] = useState<boolean>(false);
@@ -17,39 +16,40 @@ const Room = () => {
   useEffect(() => {
     const getUserID = async () => {
       let inputUserID = null;
-      while (!inputUserID) {
+      if (!inputUserID) {
         inputUserID = window.prompt("Enter your UserID");
 
-        if (!inputUserID) {
-          alert("UserID is missing");
+        if (!inputUserID || !roomID) {
+          !inputUserID
+            ? alert("UserID is missing")
+            : alert("RoomID is missing");
           window.location.replace("/");
-          break;
         }
       }
       setUserID(inputUserID);
     };
 
     getUserID();
-  }, []);
+  }, [roomID]);
 
 
   return (
     <SocketProvider>
-    <div className="room flex flex-col h-screen">
-      <div className="flex flex-1">
-        <VideoContainer roomID={roomID} userID={userID} />
-        <ParticipantsList isList={isList} setIsList={setIsList} />
-        <ChatBox isChat={isChat} setIsChat={setIsChat} />
+      <div className="room flex flex-col h-screen">
+        <div className="flex flex-1">
+          <VideoContainer roomID={roomID} userID={userID} />
+          <ParticipantsList isList={isList} setIsList={setIsList} />
+          <ChatBox isChat={isChat} setIsChat={setIsChat} />
+        </div>
+        <ButtonsRow
+          isChat={isChat}
+          setIsChat={setIsChat}
+          isList={isList}
+          setIsList={setIsList}
+          roomID={roomID}
+          userID={userID}
+        />
       </div>
-      <ButtonsRow
-        isChat={isChat}
-        setIsChat={setIsChat}
-        isList={isList}
-        setIsList={setIsList}
-        roomID={roomID}
-        userID={userID}
-      />
-    </div>
     </SocketProvider>
   );
 };

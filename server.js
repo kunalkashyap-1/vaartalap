@@ -11,8 +11,39 @@ const io = require("socket.io")(server, {
   },
 });
 
+const userConnections = [];
 io.on("connection", (socket) => {
-  socket.on("connected",({roomID, userID})=>{
+  socket.on("userConnected", ({ roomID, userID }) => {
     // console.log(roomID, userID);
-  })
+    const otherParticipants = userConnections.filter(
+      (user) => user.roomID == roomID
+    );
+    if (userID) {
+      userConnections.push({
+        connectionID: socket.id,
+        userID,
+        roomID,
+      });
+    }
+    // Emit the list of other participants to the newly connected user
+    socket.emit(
+      "otherParticipants",
+      otherParticipants.map((user) => ({
+        userID: user.userID,
+        connID: user.connectionID,
+      }))
+    );
+
+    // Emit an "informOthers" event to all other participants
+    otherParticipants.forEach((user) => {
+      socket.to(user.connectionID).emit("informOthers", {
+        otherUser: userID,
+        connID: socket.id,
+      });
+    });
+  });
+
+  socket.on("hello", ({ greeting }) => {
+    socket.emit("helloback", { greeting: "hello to you to" });
+  });
 });
