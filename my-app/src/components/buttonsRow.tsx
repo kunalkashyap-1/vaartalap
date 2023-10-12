@@ -90,7 +90,9 @@ export default function ButtonsRow({
             {mic ? <MicNoneOutlined /> : <MicOffOutlined />}
           </button>
           <button
-            onClick={() => setCamera((prevCamera) => !prevCamera)}
+            onClick={() => {setCamera((prevCamera) => !prevCamera);
+            
+            }}
             className={`${
               camera ? "bg-gray-300" : "bg-red-500 text-white"
             }  rounded-full p-3 hover:bg-opacity-80 transition duration-300`}

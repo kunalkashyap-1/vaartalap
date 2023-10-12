@@ -1,5 +1,5 @@
-"use client";
-import { useEffect, MutableRefObject, useRef } from "react";
+"use client"
+import React, { useEffect, MutableRefObject, useRef } from "react";
 import { useSocket } from "./socketProvider";
 
 interface VideoProps {
@@ -10,6 +10,7 @@ interface VideoProps {
 const VideoContainer = ({ roomID, userID }: VideoProps) => {
   const userVideoRef: MutableRefObject<any> = useRef();
   const { socket, mic, camera } = useSocket();
+  const currentStreamRef: MutableRefObject<MediaStream | null> = useRef(null);
 
   useEffect(() => {
     // Function to set the video stream to a given video element
@@ -22,51 +23,40 @@ const VideoContainer = ({ roomID, userID }: VideoProps) => {
       }
     };
 
-    let currentStream: MediaStream | null = null;
-
     const getUserMediaAndConnect = async () => {
       // Stop the previous stream if it exists
-      if (currentStream) {
-        currentStream.getTracks().forEach((track) => track.stop());
+      if (currentStreamRef.current) {
+        currentStreamRef.current.getTracks().forEach((track) => track.stop());
       }
 
-      // Create separate audio and video streams
-      const audioStream = mic
-        ? await navigator.mediaDevices.getUserMedia({ audio: true })
-        : null;
+      // Only proceed if the camera is enabled
+        const audioStream = mic ? await navigator.mediaDevices.getUserMedia({ audio: true }) : null;
+        const videoStream = camera ?await navigator.mediaDevices.getUserMedia({ video: true }) : null;
 
-      const videoStream = camera
-        ? await navigator.mediaDevices.getUserMedia({ video: true })
-        : null;
+        // Combine audio and video streams into one stream
+        const streamsToCombine: MediaStream[] = [];
 
-      if (!camera) {
-        // If camera is turned off, stop the video track
-        videoStream?.getTracks().forEach((track) => track.stop());
-      }
+        if (audioStream) {
+          streamsToCombine.push(audioStream);
+        }
 
-      // Combine audio and video streams into one stream
-      const streamsToCombine: MediaStream[] = [];
+        if (videoStream) {
+          streamsToCombine.push(videoStream);
+        }
 
-      if (audioStream) {
-        streamsToCombine.push(audioStream);
-      }
+        const combinedStream = new MediaStream();
 
-      if (videoStream) {
-        streamsToCombine.push(videoStream);
-      }
+        for (const stream of streamsToCombine) {
+          stream.getTracks().forEach((track) => {
+            combinedStream.addTrack(track);
+          });
+        }
 
-      const combinedStream = new MediaStream();
+        currentStreamRef.current = combinedStream; // Store the current stream
 
-      for (const stream of streamsToCombine) {
-        stream.getTracks().forEach((track) => {
-          combinedStream.addTrack(track);
-        });
-      }
-
-      currentStream = combinedStream; // Store the current stream
-
-      // Set the user's video stream
-      streamVideo(userVideoRef, combinedStream);
+        // Set the user's video stream
+        streamVideo(userVideoRef, combinedStream);
+      
     };
 
     // Call getUserMediaAndConnect whenever mic or camera changes
@@ -81,9 +71,16 @@ const VideoContainer = ({ roomID, userID }: VideoProps) => {
 
       // Emit a "join room" event with roomID
       socket.emit("join room", roomID);
-      socket.emit("hello",{greeting:"hello"});
+      socket.emit("hello", { greeting: "hello" });
     }
   }, [roomID, userID]);
+
+  useEffect(() => {
+    // Stop the video stream when the camera is turned off
+    if (!camera) {
+      currentStreamRef.current?.getTracks().forEach((track) => track.stop());
+    }
+  }, [camera]);
 
   return (
     <div className="flex justify-center items-center flex-1">

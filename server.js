@@ -15,9 +15,7 @@ const userConnections = [];
 io.on("connection", (socket) => {
   socket.on("userConnected", ({ roomID, userID }) => {
     // console.log(roomID, userID);
-    const otherParticipants = userConnections.filter(
-      (user) => user.roomID == roomID
-    );
+
     if (userID) {
       userConnections.push({
         connectionID: socket.id,
@@ -28,22 +26,23 @@ io.on("connection", (socket) => {
     // Emit the list of other participants to the newly connected user
     socket.emit(
       "otherParticipants",
-      otherParticipants.map((user) => ({
-        userID: user.userID,
-        connID: user.connectionID,
-      }))
+      userConnections
+        .filter((user) => user.roomID == roomID)
+        .map((user) => ({
+          userID: user.userID,
+          connID: user.connectionID,
+        }))
     );
 
+    //maybe emit something everytime another user is conneccted globally 
     // Emit an "informOthers" event to all other participants
-    otherParticipants.forEach((user) => {
-      socket.to(user.connectionID).emit("informOthers", {
-        otherUser: userID,
-        connID: socket.id,
+    userConnections
+      .filter((user) => user.roomID == roomID)
+      .forEach((user) => {
+        socket.to(user.connectionID).emit("informOthers", {
+          otherUser: userID,
+          connID: socket.id,
+        });
       });
-    });
-  });
-
-  socket.on("hello", ({ greeting }) => {
-    socket.emit("helloback", { greeting: "hello to you to" });
   });
 });

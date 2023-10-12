@@ -15,12 +15,11 @@ export default function Participants({ isList, setIsList }: participantProps) {
       console.log(data);
       setParticipantList(data);
     });
-//work on inform others
-    socket?.on("informOthers", (data) => {
+    //work on inform others
+    socket?.on("informOthers", (data: any) => {
       //raise toast that other guys joined
-      console.log(data);
+      console.log("from informOthers:-",data);
     });
-    socket?.on("helloback", ({ greeting }) => console.log(greeting));
   }, []);
   return (
     isList && (
