@@ -11,16 +11,19 @@ export default function Participants({ isList, setIsList }: participantProps) {
   const { participantList, socket, setParticipantList } = useSocket();
 
   useEffect(() => {
-    socket?.on("otherParticipants", (data) => {
+    if(socket){
+    socket.on("otherParticipants", (data) => {
       console.log(data);
       setParticipantList(data);
     });
     //work on inform others
-    socket?.on("informOthers", (data: any) => {
+    socket.on("informOthers", (data: any) => {
       //raise toast that other guys joined
-      console.log("from informOthers:-",data);
+      console.log("from informOthers:-", data);
     });
+  }
   }, []);
+  
   return (
     isList && (
       <div className="list">
