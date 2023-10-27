@@ -65,7 +65,7 @@ const io = require("socket.io")(server, {
     },
   });
 
-const userConnections = [];
+let userConnections = [];
 
 app.use(express.static("public"));
 

@@ -4,7 +4,6 @@ import { useSocket } from "./socketProvider";
 
 interface VideoProps {
   roomID: string | null;
-  userID: string | null;
 }
 
 // const VideoContainer = ({ roomID, userID }: VideoProps) => {
@@ -99,19 +98,24 @@ interface VideoProps {
 
 // VideoContainer.tsx
 
-const VideoContainer: React.FC<VideoProps> = ({ roomID, userID }) => {
+const VideoContainer: React.FC<VideoProps> = ({ roomID }) => {
   const userVideoRef = useRef<HTMLVideoElement>(null);
   const peerVideoRef = useRef<HTMLVideoElement>(null);
   const { socket } = useSocket();
   const peerConnection = new RTCPeerConnection();
+  const localUserID = localStorage.getItem("localUserID");
 
   useEffect(() => {
+
+
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
         if (userVideoRef.current) {
           userVideoRef.current.srcObject = stream;
-          stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
+          stream
+            .getTracks()
+            .forEach((track) => peerConnection.addTrack(track, stream));
         }
 
         peerConnection.ontrack = (event) => {
@@ -122,23 +126,27 @@ const VideoContainer: React.FC<VideoProps> = ({ roomID, userID }) => {
       });
 
     if (socket) {
-      socket.emit("userConnected", { roomID, userID });
+      socket.emit("userConnected", { roomID, localUserID });
 
-      socket.on("user-connected", async (userId) => {
+      socket.on("user-connected", async (userId: any) => {
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
         socket.emit("offer", { offer, userId });
       });
 
       socket.on("receive-offer", async (offer, callerSocketID) => {
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        await peerConnection.setRemoteDescription(
+          new RTCSessionDescription(offer)
+        );
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
         socket.emit("answer", { answer, callerSocketID });
       });
 
       socket.on("receive-answer", async (answer) => {
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        await peerConnection.setRemoteDescription(
+          new RTCSessionDescription(answer)
+        );
       });
 
       socket.on("receive-ice-candidate", async (candidate) => {
@@ -147,15 +155,16 @@ const VideoContainer: React.FC<VideoProps> = ({ roomID, userID }) => {
 
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
-          socket.emit('new-ice-candidate', event.candidate);
+          socket.emit("new-ice-candidate", event.candidate);
         }
       };
     }
-  }, [userID, roomID]);
+  }, []);
 
   return (
     <div>
       <video ref={userVideoRef} autoPlay muted />
+      <p>{localUserID}</p>
       <video ref={peerVideoRef} autoPlay />
     </div>
   );

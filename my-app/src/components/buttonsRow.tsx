@@ -23,7 +23,6 @@ interface ButtonsProps {
   isList: boolean;
   setIsList: Dispatch<SetStateAction<boolean>>;
   roomID: string | null;
-  userID: string | null;
 }
 
 export default function ButtonsRow({
@@ -32,7 +31,6 @@ export default function ButtonsRow({
   isList,
   setIsList,
   roomID,
-  userID,
 }: ButtonsProps) {
   const [infoVisible, setInfoVisible] = useState(false);
   const {
@@ -44,6 +42,7 @@ export default function ButtonsRow({
     setCaption,
     screenShare,
     setScreenShare,
+    localUserID
   } = useSocket();
 
   return (
@@ -73,7 +72,7 @@ export default function ButtonsRow({
         </button>
         {infoVisible && (
           <div className="absolute bottom-24 right-0 w-60 bg-white p-4 shadow-lg">
-            {userID && <h1>{`${userID}'s meeting`}</h1>}
+            {localUserID && <h1>{`${localUserID}'s meeting`}</h1>}
             <p className="text-gray-800">Room ID: {roomID}</p>
           </div>
         )}

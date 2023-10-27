@@ -5,39 +5,36 @@ import ParticipantsList from "../../components/participants";
 import VideoContainer from "../../components/videoContainer";
 import ButtonsRow from "../../components/buttonsRow";
 import { useSearchParams } from "next/navigation";
-import { SocketProvider } from "../../components/socketProvider";
 
 const Room = () => {
   const [isChat, setIsChat] = useState<boolean>(false);
   const [isList, setIsList] = useState<boolean>(false);
   const roomID = useSearchParams().get("roomID");
-  const [userID, setUserID] = useState<string | null>(null);
+  // useEffect(() => {
+  //   const getUserID = async () => {
+  //     let inputUserID = null;
+  //     if (!inputUserID) {
+  //       inputUserID = window.prompt("Enter your UserID");
 
-  useEffect(() => {
-    const getUserID = async () => {
-      let inputUserID = null;
-      if (!inputUserID) {
-        inputUserID = window.prompt("Enter your UserID");
+  //       if (!inputUserID || !roomID) {
+  //         !inputUserID
+  //           ? alert("UserID is missing")
+  //           : alert("RoomID is missing");
+  //         window.location.replace("/");
+  //       }
+  //     }
+  //     setUserID(inputUserID);
+  //   };
 
-        if (!inputUserID || !roomID) {
-          !inputUserID
-            ? alert("UserID is missing")
-            : alert("RoomID is missing");
-          window.location.replace("/");
-        }
-      }
-      setUserID(inputUserID);
-    };
+  //   getUserID();
+  // }, [roomID]);
 
-    getUserID();
-  }, [roomID]);
-
+// console.log(userID);
 
   return (
-    <SocketProvider>
       <div className="room flex flex-col h-screen">
         <div className="flex flex-1">
-          <VideoContainer roomID={roomID} userID={userID} />
+          <VideoContainer roomID={roomID}/>
           <ParticipantsList isList={isList} setIsList={setIsList} />
           <ChatBox isChat={isChat} setIsChat={setIsChat} />
         </div>
@@ -47,10 +44,8 @@ const Room = () => {
           isList={isList}
           setIsList={setIsList}
           roomID={roomID}
-          userID={userID}
         />
       </div>
-    </SocketProvider>
   );
 };
 

@@ -3,17 +3,37 @@ import Image from "next/image";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Box, TextField, Typography, Modal, Button } from "@mui/material";
+import { SocketProvider } from "../components/socketProvider";
 
-export default function Home() {
+const style = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
+};
+
+const Home = () => {
   const [code, setCode] = useState<string>("");
   const { push } = useRouter();
+  const [open, setOpen] = useState<boolean>(false);
+  const [ localUserID, setLocalUserID ] = useState("");
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   const handleRoom = () => {
-    const fourDigit = Math.floor((Math.random() * 4)*10000);
+    const fourDigit = Math.floor(Math.random() * 4 * 10000);
+    localStorage.setItem("localUserID", localUserID);
     window.location.replace(`/room?roomID=${fourDigit}`);
   };
 
   return (
+    <SocketProvider>
     <div className="bg-gray-100 h-screen">
       <nav className="navbar bg-white flex justify-between p-4 items-center">
         <div
@@ -27,7 +47,7 @@ export default function Home() {
         </div>
         <button
           className="bg-purple-700 font-semibold rounded-lg p-3 text-white hover:bg-purple-600 transition-colors"
-          onClick={handleRoom}
+          onClick={handleOpen}
         >
           Start a meeting
         </button>
@@ -42,7 +62,7 @@ export default function Home() {
               <div className="flex gap-6 items-center">
                 <button
                   className="bg-purple-700 rounded-lg p-3 text-white hover:bg-purple-600 transition-colors"
-                  onClick={handleRoom}
+                  onClick={handleOpen}
                 >
                   Create instant meeting
                 </button>
@@ -73,7 +93,40 @@ export default function Home() {
             />
           </div>
         </div>
+        <div>
+          <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <Box sx={style}>
+              {/* <Typography id="modal-modal-title" variant="h6" component="h2">
+                Enter User ID
+              </Typography> */}
+              <TextField
+                id="outlined-basic"
+                label="Enter User ID"
+                variant="outlined"
+                onChange={(e) => {
+                  setLocalUserID(e.target.value);
+                }}
+              />
+              <Button
+                className="bg-green-900"
+                variant="contained"
+                color="success"
+                onClick={handleRoom}
+              >
+                Submit
+              </Button>
+            </Box>
+          </Modal>
+        </div>
       </main>
     </div>
+    </SocketProvider>
   );
-}
+};
+
+export default Home;
