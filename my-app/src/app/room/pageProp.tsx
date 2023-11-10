@@ -1,11 +1,10 @@
 "use client"
 import React, { useEffect, useCallback, useState } from "react";
 import ReactPlayer from "react-player";
-import peer from "../service/peer";
-import { useSocket } from "../components/socketProvider";
+import peer from "../../service/peer";
+import { useSocket } from "../../components/socketProvider";
 
-
-const VideoContainer = () => {
+const RoomPage = () => {
   const {socket} = useSocket();
   const [remoteSocketId, setRemoteSocketId] = useState(null);
   const [myStream, setMyStream] = useState<any>();
@@ -115,7 +114,7 @@ const VideoContainer = () => {
     <div>
       <h1>Room Page</h1>
       <h4>{remoteSocketId ? "Connected" : "No one in room"}</h4>
-      {/* {myStream && <button onClick={sendStreams}>Send Stream</button>} */}
+      {myStream && <button onClick={sendStreams}>Send Stream</button>}
       {remoteSocketId && <button onClick={handleCallUser}>CALL</button>}
       {myStream && (
         <>
@@ -123,7 +122,7 @@ const VideoContainer = () => {
           <ReactPlayer
             playing
             muted
-            height="200px"
+            height="100px"
             width="200px"
             url={myStream}
           />
@@ -134,8 +133,8 @@ const VideoContainer = () => {
           <h1>Remote Stream</h1>
           <ReactPlayer
             playing
-            // muted
-            height="200px"
+            muted
+            height="100px"
             width="200px"
             url={remoteStream}
           />
@@ -145,4 +144,4 @@ const VideoContainer = () => {
   );
 };
 
-export default VideoContainer;
+export default RoomPage;

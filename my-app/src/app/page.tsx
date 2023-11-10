@@ -1,10 +1,11 @@
 "use client";
 import Image from "next/image";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Box, TextField, Typography, Modal, Button } from "@mui/material";
-import { SocketProvider } from "../components/socketProvider";
+import { useSocket } from "../components/socketProvider";
+
 
 const style = {
   position: "absolute" as "absolute",
@@ -22,18 +23,36 @@ const Home = () => {
   const [code, setCode] = useState<string>("");
   const { push } = useRouter();
   const [open, setOpen] = useState<boolean>(false);
-  const [ localUserID, setLocalUserID ] = useState("");
+  const [ email, setEmail ] = useState("");
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const {socket} = useSocket();
 
-  const handleRoom = () => {
-    const fourDigit = Math.floor(Math.random() * 4 * 10000);
-    localStorage.setItem("localUserID", localUserID);
-    window.location.replace(`/room?roomID=${fourDigit}`);
-  };
+  const handleSubmit = useCallback(
+    (e:any) => {
+      // e.preventDefault();
+      const fourDigit = Math.floor(Math.random() * 4 * 10000);
+      socket?.emit("room:join", { email, room:fourDigit.toString() });
+    },
+    [email, socket]
+  );
+
+  const handleJoinRoom = useCallback(
+    (data :any) => {
+      const { email, room } = data;
+     push(`/room?roomID=${room}`);
+    },
+    [push]
+  );
+
+  useEffect(() => {
+    socket?.on("room:join", handleJoinRoom);
+    return () => {
+      socket?.off("room:join", handleJoinRoom);
+    };
+  }, [socket, handleJoinRoom]);
 
   return (
-    <SocketProvider>
     <div className="bg-gray-100 h-screen">
       <nav className="navbar bg-white flex justify-between p-4 items-center">
         <div
@@ -106,17 +125,19 @@ const Home = () => {
               </Typography> */}
               <TextField
                 id="outlined-basic"
-                label="Enter User ID"
+                label="Enter Email ID"
                 variant="outlined"
+                type="email"
+                required
                 onChange={(e) => {
-                  setLocalUserID(e.target.value);
+                  setEmail(e.target.value);
                 }}
               />
               <Button
                 className="bg-green-900"
                 variant="contained"
                 color="success"
-                onClick={handleRoom}
+                onClick={handleSubmit}
               >
                 Submit
               </Button>
@@ -125,7 +146,6 @@ const Home = () => {
         </div>
       </main>
     </div>
-    </SocketProvider>
   );
 };
 

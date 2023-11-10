@@ -7,8 +7,9 @@ import {
   useState,
   Dispatch,
   SetStateAction,
-  useMemo,
+  useEffect,
 } from "react";
+
 import { Socket, io } from "socket.io-client";
 const ENDPOINT = "localhost:8383";
 
@@ -61,10 +62,7 @@ export const useSocket = () => {
 };
 
 export const SocketProvider: FC<SocketProviderProps> = ({ children }) => {
-  const socket: Socket | null = useMemo(
-    () => (typeof io !== "undefined" ? io(ENDPOINT) : null),
-    []
-  );
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [mic, setMic] = useState(false);
   const [camera, setCamera] = useState(false);
   const [caption, setCaption] = useState(false);
@@ -76,6 +74,15 @@ export const SocketProvider: FC<SocketProviderProps> = ({ children }) => {
       roomID: string;
     }[]
   >([]);
+
+  useEffect(() => {
+    const socketIo = io(ENDPOINT);
+    setSocket(socketIo);
+
+    return () => {
+      socketIo.disconnect();
+    };
+  }, []);
 
   return (
     <SocketContext.Provider
