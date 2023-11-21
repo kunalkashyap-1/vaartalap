@@ -13,10 +13,14 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.11",
     "@mui/material": "^5.14.11",
+    "@types/react-speech-recognition": "^3.9.5",
+    "@types/regenerator-runtime": "^0.13.5",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
     "react-player": "^2.13.0",
+    "react-speech-recognition": "^3.10.0",
+    "regenerator-runtime": "^0.14.0",
     "socket.io-client": "^4.7.2"
   },
   "devDependencies": {

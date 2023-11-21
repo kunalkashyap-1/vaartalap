@@ -1,17 +1,16 @@
-"use client"
+"use client";
 import React, { useEffect, useCallback, useState } from "react";
 import ReactPlayer from "react-player";
 import peer from "../service/peer";
 import { useSocket } from "../components/socketProvider";
 
-
 const VideoContainer = () => {
-  const {socket} = useSocket();
+  const { socket } = useSocket();
   const [remoteSocketId, setRemoteSocketId] = useState(null);
   const [myStream, setMyStream] = useState<any>();
   const [remoteStream, setRemoteStream] = useState<any>();
 
-  const handleUserJoined = useCallback(({ email, id }:any) => {
+  const handleUserJoined = useCallback(({ email, id }: any) => {
     console.log(`Email ${email} joined room`);
     setRemoteSocketId(id);
   }, []);
@@ -27,7 +26,7 @@ const VideoContainer = () => {
   }, [remoteSocketId, socket]);
 
   const handleIncommingCall = useCallback(
-    async ({ from, offer }:any) => {
+    async ({ from, offer }: any) => {
       setRemoteSocketId(from);
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -48,7 +47,7 @@ const VideoContainer = () => {
   }, [myStream]);
 
   const handleCallAccepted = useCallback(
-    ({ from, ans }:any) => {
+    ({ from, ans }: any) => {
       peer.setLocalDescription(ans);
       console.log("Call Accepted!");
       sendStreams();
@@ -69,14 +68,14 @@ const VideoContainer = () => {
   }, [handleNegoNeeded]);
 
   const handleNegoNeedIncomming = useCallback(
-    async ({ from, offer }:any) => {
+    async ({ from, offer }: any) => {
       const ans = await peer.getAnswer(offer);
       socket?.emit("peer:nego:done", { to: from, ans });
     },
     [socket]
   );
 
-  const handleNegoNeedFinal = useCallback(async ({ ans }:any) => {
+  const handleNegoNeedFinal = useCallback(async ({ ans }: any) => {
     await peer.setLocalDescription(ans);
   }, []);
 
