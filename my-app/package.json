@@ -15,7 +15,7 @@
     "@mui/material": "^5.14.11",
     "@types/react-speech-recognition": "^3.9.5",
     "@types/regenerator-runtime": "^0.13.5",
-    "next": "latest",
+    "next": "^14.0.3",
     "react": "latest",
     "react-dom": "latest",
     "react-player": "^2.13.0",

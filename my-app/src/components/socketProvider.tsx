@@ -63,8 +63,8 @@ export const useSocket = () => {
 
 export const SocketProvider: FC<SocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [mic, setMic] = useState(false);
-  const [camera, setCamera] = useState(false);
+  const [mic, setMic] = useState(true);
+  const [camera, setCamera] = useState(true);
   const [caption, setCaption] = useState(false);
   const [screenShare, setScreenShare] = useState(false);
   const [participantList, setParticipantList] = useState<

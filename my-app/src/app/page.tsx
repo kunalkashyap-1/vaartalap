@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { Box, TextField, Typography, Modal, Button } from "@mui/material";
 import { useSocket } from "../components/socketProvider";
 
-
 const style = {
   position: "absolute" as "absolute",
   top: "50%",
@@ -23,24 +22,25 @@ const Home = () => {
   const [code, setCode] = useState<string>("");
   const { push } = useRouter();
   const [open, setOpen] = useState<boolean>(false);
-  const [ email, setEmail ] = useState("");
+  const [email, setEmail] = useState("");
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const {socket} = useSocket();
+  const { socket } = useSocket();
 
   const handleSubmit = useCallback(
-    (e:any) => {
+    (e: any) => {
       // e.preventDefault();
       const fourDigit = Math.floor(Math.random() * 4 * 10000);
-      socket?.emit("room:join", { email, room:fourDigit.toString() });
+      window.localStorage.setItem("localUserID", email);
+      socket?.emit("room:join", { email, room: fourDigit.toString() });
     },
     [email, socket]
   );
 
   const handleJoinRoom = useCallback(
-    (data :any) => {
+    (data: any) => {
       const { email, room } = data;
-     push(`/room?roomID=${room}`);
+      push(`/room?roomID=${room}`);
     },
     [push]
   );
@@ -119,7 +119,7 @@ const Home = () => {
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
           >
-            <Box sx={style}>
+            <Box sx={style} className="flex flex-col gap-4 rounded-2xl">
               {/* <Typography id="modal-modal-title" variant="h6" component="h2">
                 Enter User ID
               </Typography> */}
@@ -134,7 +134,7 @@ const Home = () => {
                 }}
               />
               <Button
-                className="bg-green-900"
+                className="bg-green-900 w-1/2"
                 variant="contained"
                 color="success"
                 onClick={handleSubmit}

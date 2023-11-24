@@ -33,6 +33,7 @@ export default function ButtonsRow({
   roomID,
 }: ButtonsProps) {
   const [infoVisible, setInfoVisible] = useState(false);
+  const localUserID = window.localStorage.getItem("localUserID");
   const {
     mic,
     setMic,
@@ -42,17 +43,19 @@ export default function ButtonsRow({
     setCaption,
     screenShare,
     setScreenShare,
-    localUserID
   } = useSocket();
 
   return (
-    <div className="flex flex-row-reverse justify-between items-center p-4">
+    <div
+      className="flex flex-row-reverse justify-between items-center p-4"
+      style={{ backgroundColor: "#333" }}
+    >
       <div className="space-x-4">
         <button
           onClick={() => setIsChat((prevIsChat: boolean) => !prevIsChat)}
           className={`${
             isChat ? "bg-purple-300" : ""
-          }  place-content-center rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
+          }  place-content-center text-white rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
         >
           <MessageOutlined />
         </button>
@@ -60,13 +63,13 @@ export default function ButtonsRow({
           onClick={() => setIsList((prev: boolean) => !prev)}
           className={`${
             isList ? "bg-purple-300" : ""
-          }  place-content-center rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
+          }  place-content-center text-white rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
         >
           <PeopleAltOutlined />
         </button>
         <button
           onClick={() => setInfoVisible((prev) => !prev)}
-          className="text-gray-600"
+          className="text-gray-400"
         >
           <InfoOutlined />
         </button>
@@ -89,8 +92,8 @@ export default function ButtonsRow({
             {mic ? <MicNoneOutlined /> : <MicOffOutlined />}
           </button>
           <button
-            onClick={() => {setCamera((prevCamera) => !prevCamera);
-            
+            onClick={() => {
+              setCamera((prevCamera) => !prevCamera);
             }}
             className={`${
               camera ? "bg-gray-300" : "bg-red-500 text-white"
@@ -102,7 +105,7 @@ export default function ButtonsRow({
             onClick={() => setScreenShare((prevShare) => !prevShare)}
             className={`${
               !screenShare ? "" : "bg-red-500 text-white"
-            }  rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
+            }  rounded-full p-3 text-white hover:bg-opacity-80 transition duration-300`}
           >
             {!screenShare ? (
               <ScreenShareOutlined />
@@ -114,7 +117,7 @@ export default function ButtonsRow({
             onClick={() => setCaption((prevCaption) => !prevCaption)}
             className={`${
               !caption ? "" : "bg-red-500 text-white"
-            }  rounded-full place-content-center p-3 hover:bg-opacity-80 transition duration-300`}
+            }  rounded-full text-white place-content-center p-3 hover:bg-opacity-80 transition duration-300`}
           >
             {!caption ? (
               <ClosedCaptionOffOutlined />
@@ -123,7 +126,12 @@ export default function ButtonsRow({
             )}
           </button>
           <button
-            onClick={() => {window.location.replace("/")} /* Implement your logic for ending the call */}
+            onClick={
+              () => {
+                window.localStorage.removeItem("localUserID");
+                window.location.replace("/");
+              } /* Implement your logic for ending the call */
+            }
             className="bg-red-500 text-white rounded-full p-3 hover:bg-opacity-80 transition duration-300"
           >
             <CallEndOutlined />
