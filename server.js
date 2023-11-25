@@ -46,5 +46,5 @@ io.on("connection", (socket) => {
 });
 
 server.listen(8383, () => {
-  console.log("Server is live on http://localhost:8383");
+  console.log("Server is live");
 });
