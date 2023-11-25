@@ -23,38 +23,26 @@ const VideoContainer = () => {
   const [remoteStream, setRemoteStream] = useState<any>();
   const [onCall, setOnCall] = useState<boolean>(false);
 
+ 
   const handleUserJoined = useCallback(({ email, id }: any) => {
     console.log(`Email ${email} joined room`);
     setRemoteSocketId(id);
   }, []);
 
+  const handleCallUser = useCallback(async () => {
+    const offer = await peer.getOffer();
+    socket?.emit("user:call", { to: remoteSocketId, offer });
+  }, [remoteSocketId, socket]);
 
-const handleCallUser = useCallback(async () => {
-  const stream = await navigator.mediaDevices.getUserMedia({
-    audio: true,  // Always get the audio track
-    video: true,  // Always get the video track
-  });
-  const offer = await peer.getOffer();
-  socket?.emit("user:call", { to: remoteSocketId, offer });
-  setMyStream(stream);
-}, [remoteSocketId, socket, setMyStream]);
-
-const handleIncommingCall = useCallback(
-  async ({ from, offer }: any) => {
-    setRemoteSocketId(from);
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: true,
-    });
-    setMyStream(stream);
-    console.log(`Incoming Call`, from, offer);
-    const ans = await peer.getAnswer(offer);
-    socket?.emit("call:accepted", { to: from, ans });
-  },
-  [socket]
-);
-
-  
+  const handleIncommingCall = useCallback(
+    async ({ from, offer }: any) => {
+      setRemoteSocketId(from);
+      console.log(`Incoming Call`, from, offer);
+      const ans = await peer.getAnswer(offer);
+      socket?.emit("call:accepted", { to: from, ans });
+    },
+    [socket]
+  );
 
   const sendStreams = useCallback(() => {
     for (const track of myStream.getTracks()) {
@@ -126,25 +114,31 @@ const handleIncommingCall = useCallback(
     handleNegoNeedFinal,
   ]);
 
+  // useEffect to fetch stream and set it to myStream state
+  useEffect(() => {
+    const fetchStream = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,  // Always get the audio track
+        video: true,  // Always get the video track
+      });
+      setMyStream(stream);
+    };
+    fetchStream();
+  }, []);
+
+  // useEffect to handle turning on and off camera and mic
   useEffect(() => {
     if (myStream) {
-      myStream.getAudioTracks().forEach((track:any) => {
-        if (!mic) {
-          track.stop();  // Stop the audio track
-        }
-      });
+      const videoTrack = myStream.getVideoTracks()[0];
+      const audioTrack = myStream.getAudioTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = camera;
+      }
+      if (audioTrack) {
+        audioTrack.enabled = mic;
+      }
     }
-  }, [mic, myStream, sendStreams]);
-  
-  useEffect(() => {
-    if (myStream) {
-      myStream.getVideoTracks().forEach((track:any) => {
-        if (!camera) {
-          track.stop();  // Stop the video track
-        }
-      });
-    }
-  }, [camera, myStream, sendStreams]);
+  }, [myStream, camera, mic]);
 
   return (
     <section className="flex-1" style={{ backgroundColor: "rgb(28,30,32)" }}>
