@@ -11,7 +11,7 @@ import {
 } from "react";
 
 import { Socket, io } from "socket.io-client";
-const ENDPOINT = "localhost:8383";
+const ENDPOINT = process.env.NEXT_PUBLI_ENDPOINT ?? "locahost:8383";
 
 interface ISocketContext {
   socket: Socket | null;
