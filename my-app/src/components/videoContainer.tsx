@@ -46,7 +46,7 @@ const VideoContainer = () => {
 
   const sendStreams = useCallback(() => {
     for (const track of myStream.getTracks()) {
-      peer.peer.addTrack(track, myStream);
+      peer.peer?.addTrack(track, myStream);
     }
   }, [myStream]);
 
@@ -65,9 +65,9 @@ const VideoContainer = () => {
   }, [remoteSocketId, socket]);
 
   useEffect(() => {
-    peer.peer.addEventListener("negotiationneeded", handleNegoNeeded);
+    peer.peer?.addEventListener("negotiationneeded", handleNegoNeeded);
     return () => {
-      peer.peer.removeEventListener("negotiationneeded", handleNegoNeeded);
+      peer.peer?.removeEventListener("negotiationneeded", handleNegoNeeded);
     };
   }, [handleNegoNeeded]);
 
@@ -84,7 +84,7 @@ const VideoContainer = () => {
   }, []);
 
   useEffect(() => {
-    peer.peer.addEventListener("track", async (ev) => {
+    peer.peer?.addEventListener("track", async (ev) => {
       const remoteStream = ev.streams;
       console.log("GOT TRACKS!!");
       setRemoteStream(remoteStream[0]);

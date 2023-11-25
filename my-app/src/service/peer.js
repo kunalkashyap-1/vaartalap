@@ -1,7 +1,6 @@
-"use client"
 class PeerService {
   constructor() {
-    if (!this.peer) {
+    if (typeof window !== 'undefined') {
       this.peer = new RTCPeerConnection({
         iceServers: [
           {
