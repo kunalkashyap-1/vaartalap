@@ -3,6 +3,8 @@ import React, { useEffect, useCallback, useState } from "react";
 import ReactPlayer from "react-player";
 import peer from "../service/peer";
 import { useSocket } from "../components/socketProvider";
+import vad from "voice-activity-detection";
+
 
 const VideoContainer = () => {
   const {
@@ -23,7 +25,6 @@ const VideoContainer = () => {
   const [remoteStream, setRemoteStream] = useState<any>();
   const [onCall, setOnCall] = useState<boolean>(false);
 
- 
   const handleUserJoined = useCallback(({ email, id }: any) => {
     console.log(`Email ${email} joined room`);
     setRemoteSocketId(id);
@@ -118,13 +119,80 @@ const VideoContainer = () => {
   useEffect(() => {
     const fetchStream = async () => {
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,  // Always get the audio track
-        video: true,  // Always get the video track
+        audio: true, // Always get the audio track
+        video: true, // Always get the video track
       });
       setMyStream(stream);
     };
     fetchStream();
   }, []);
+
+  // useEffect to handle VAD
+  useEffect(() => {
+    if (myStream) {
+      const audioContext = new AudioContext();
+      const source = audioContext.createMediaStreamSource(myStream);
+  
+      vad(audioContext, myStream, {
+        fftSize: 1024,
+        bufferLen: 1024,
+        smoothingTimeConstant: 0.2,
+        minCaptureFreq: 85,
+        maxCaptureFreq: 255,
+        noiseCaptureDuration: 1000,
+        minNoiseLevel: 0.3,
+        maxNoiseLevel: 0.7,
+        avgNoiseMultiplier: 1.2,
+        // onVoiceStart: () => {
+        //   // Voice activity has started
+        //   const audioChunks:any = [];
+  
+        //   // Set a timer to capture 3 seconds of audio
+        //   const timer = setInterval(() => {
+        //     const audioTrack = myStream.getAudioTracks()[0];
+        //     const newStream = new MediaStream([audioTrack.clone()]);
+        //     audioChunks.push(newStream);
+  
+        //     if (audioChunks.length >= 3) {
+        //       // Send the accumulated audio chunks to the API
+        //       const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        //       const formData = new FormData();
+        //       formData.append('audio', blob, 'audio_chunk.webm');
+  
+        //       // Make a POST request to your API endpoint
+        //       fetch('your_api_endpoint', {
+        //         method: 'POST',
+        //         body: formData,
+        //       })
+        //         .then(response => response.json())
+        //         .then(data => {
+        //           // Handle the API response if needed
+        //           console.log('API response:', data);
+        //         })
+        //         .catch(error => {
+        //           console.error('Error sending audio chunk to API:', error);
+        //         });
+  
+        //       // Clear the accumulated audio chunks
+        //       audioChunks.length = 0;
+        //     }
+        //   }, 1000); // Capture audio every 1 second
+  
+        //   // Set a timeout to stop capturing after 3 seconds
+        //   setTimeout(() => {
+        //     clearInterval(timer);
+        //   }, 3000);
+        // },
+        // onVoiceStop: () => {
+        //   // Voice activity has stopped
+        // },
+        // onUpdate: (val: number) => {
+        //   // Update callback if needed
+        // },
+      });
+    }
+  }, [myStream]);
+  
 
   // useEffect to handle turning on and off camera and mic
   useEffect(() => {
