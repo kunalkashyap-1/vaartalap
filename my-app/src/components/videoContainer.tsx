@@ -5,7 +5,6 @@ import peer from "../service/peer";
 import { useSocket } from "../components/socketProvider";
 import vad from "voice-activity-detection";
 
-
 const VideoContainer = () => {
   const {
     socket,
@@ -132,7 +131,7 @@ const VideoContainer = () => {
     if (myStream) {
       const audioContext = new AudioContext();
       const source = audioContext.createMediaStreamSource(myStream);
-  
+
       vad(audioContext, myStream, {
         fftSize: 1024,
         bufferLen: 1024,
@@ -143,56 +142,73 @@ const VideoContainer = () => {
         minNoiseLevel: 0.3,
         maxNoiseLevel: 0.7,
         avgNoiseMultiplier: 1.2,
-        // onVoiceStart: () => {
-        //   // Voice activity has started
-        //   const audioChunks:any = [];
-  
-        //   // Set a timer to capture 3 seconds of audio
-        //   const timer = setInterval(() => {
-        //     const audioTrack = myStream.getAudioTracks()[0];
-        //     const newStream = new MediaStream([audioTrack.clone()]);
-        //     audioChunks.push(newStream);
-  
-        //     if (audioChunks.length >= 3) {
-        //       // Send the accumulated audio chunks to the API
-        //       const blob = new Blob(audioChunks, { type: 'audio/webm' });
-        //       const formData = new FormData();
-        //       formData.append('audio', blob, 'audio_chunk.webm');
-  
-        //       // Make a POST request to your API endpoint
-        //       fetch('your_api_endpoint', {
-        //         method: 'POST',
-        //         body: formData,
-        //       })
-        //         .then(response => response.json())
-        //         .then(data => {
-        //           // Handle the API response if needed
-        //           console.log('API response:', data);
-        //         })
-        //         .catch(error => {
-        //           console.error('Error sending audio chunk to API:', error);
-        //         });
-  
-        //       // Clear the accumulated audio chunks
-        //       audioChunks.length = 0;
-        //     }
-        //   }, 1000); // Capture audio every 1 second
-  
-        //   // Set a timeout to stop capturing after 3 seconds
-        //   setTimeout(() => {
-        //     clearInterval(timer);
-        //   }, 3000);
-        // },
-        // onVoiceStop: () => {
-        //   // Voice activity has stopped
-        // },
-        // onUpdate: (val: number) => {
-        //   // Update callback if needed
-        // },
+        onVoiceStart: () => {
+          // Voice activity has started
+          console.log("audio started");
+          const audioChunks: any[] = [];
+
+          // Set a timer to capture 5 seconds of audio
+          const timer = setInterval(() => {
+            const audioTrack = myStream.getAudioTracks()[0];
+            const newStream = new MediaStream([audioTrack.clone()]);
+            audioChunks.push(newStream);
+
+            if (audioChunks.length >= 5) {
+              // Send the accumulated audio chunks to the Django API for translation
+              const blob = new Blob(audioChunks, { type: "audio/webm" });
+              const formData = new FormData();
+              formData.append("audio", blob, "audio_chunk.webm");
+
+              fetch("http://localhost:8000/api/process/", {
+                method: "POST",
+                body: formData,
+              })
+                .then((response) => {
+                  if (response.ok) {
+                    return response.json();
+                  } else {
+                    // Handle non-OK response
+                    throw new Error(
+                      `Django API returned non-OK status: ${response.status}`
+                    );
+                  }
+                })
+                .then((data) => {
+                  // Handle the Django API response for translation if needed
+                  console.log("Django API translation response:", data);
+                })
+                .catch((error) => {
+                  // Handle fetch error or other errors
+                  console.error(
+                    "Error sending audio chunk to Django API for translation:",
+                    error
+                  );
+                })
+                .finally(() => {
+                  // Clear the accumulated audio chunks
+                  audioChunks.length = 0;
+                });
+
+              // Clear the timer to stop capturing
+              clearInterval(timer);
+            }
+          }, 1000); // Capture audio every 1 second
+
+          // Set a timeout to stop capturing after 5 seconds
+          setTimeout(() => {
+            clearInterval(timer);
+          }, 5000);
+        },
+        onVoiceStop: () => {
+          // Voice activity has stopped
+          console.log("audio stop");
+        },
+        onUpdate: (val: number) => {
+          // Update callback if needed
+        },
       });
     }
   }, [myStream]);
-  
 
   // useEffect to handle turning on and off camera and mic
   useEffect(() => {

@@ -1,6 +1,6 @@
 "use client";
 // ButtonsRow.js
-import React, { useState, Dispatch, SetStateAction } from "react";
+import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
 import {
   MicNoneOutlined,
   MicOffOutlined,
@@ -33,7 +33,7 @@ export default function ButtonsRow({
   roomID,
 }: ButtonsProps) {
   const [infoVisible, setInfoVisible] = useState(false);
-  const localUserID = window.localStorage.getItem("localUserID");
+  const [localUserID,setLocalUserID] = useState<string | null>();
   const {
     mic,
     setMic,
@@ -44,6 +44,10 @@ export default function ButtonsRow({
     screenShare,
     setScreenShare,
   } = useSocket();
+
+  useEffect(()=>{
+    setLocalUserID(window.localStorage.getItem("localUserID"));
+  },[]);
 
   return (
     <div
