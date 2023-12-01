@@ -23,6 +23,8 @@ const VideoContainer = () => {
   const [myStream, setMyStream] = useState<any>();
   const [remoteStream, setRemoteStream] = useState<any>();
   const [onCall, setOnCall] = useState<boolean>(false);
+  let language = "hi";
+  let translate = "true";
 
   const handleUserJoined = useCallback(({ email, id }: any) => {
     console.log(`Email ${email} joined room`);
@@ -143,62 +145,65 @@ const VideoContainer = () => {
         maxNoiseLevel: 0.7,
         avgNoiseMultiplier: 1.2,
         onVoiceStart: () => {
-          // Voice activity has started
           console.log("audio started");
-          const audioChunks: any[] = [];
 
-          // Set a timer to capture 5 seconds of audio
-          const timer = setInterval(() => {
-            const audioTrack = myStream.getAudioTracks()[0];
-            const newStream = new MediaStream([audioTrack.clone()]);
-            audioChunks.push(newStream);
+          // const mediaRecorder = new MediaRecorder(myStream);
+          // let audioChunks: any = [];
+          // let intervalId: any;
 
-            if (audioChunks.length >= 5) {
-              // Send the accumulated audio chunks to the Django API for translation
-              const blob = new Blob(audioChunks, { type: "audio/webm" });
-              const formData = new FormData();
-              formData.append("audio", blob, "audio_chunk.webm");
+          // const sendDataToAPI = () => {
+          //   const blob = new Blob(audioChunks, { type: "audio/wav" });
+          //   const formData = new FormData();
+          //   formData.append("audio", blob, "audio_chunk.wav");
+          //   formData.append("translate",translate);
+          //   formData.append("language",language);
 
-              fetch("http://localhost:8000/api/process/", {
-                method: "POST",
-                body: formData,
-              })
-                .then((response) => {
-                  if (response.ok) {
-                    return response.json();
-                  } else {
-                    // Handle non-OK response
-                    throw new Error(
-                      `Django API returned non-OK status: ${response.status}`
-                    );
-                  }
-                })
-                .then((data) => {
-                  // Handle the Django API response for translation if needed
-                  console.log("Django API translation response:", data);
-                })
-                .catch((error) => {
-                  // Handle fetch error or other errors
-                  console.error(
-                    "Error sending audio chunk to Django API for translation:",
-                    error
-                  );
-                })
-                .finally(() => {
-                  // Clear the accumulated audio chunks
-                  audioChunks.length = 0;
-                });
+          //   fetch("http://localhost:8000/api/process/", {
+          //     method: "POST",
+          //     body: formData,
+          //   })
+          //     .then((response) => {
+          //       if (response.ok) {
+          //         return response.json();
+          //       } else {
+          //         throw new Error(
+          //           `Django API returned non-OK status: ${response.status}`
+          //         );
+          //       }
+          //     })
+          //     .then((data) => {
+          //       console.log("Django API translation response:", data);
+          //     })
+          //     .catch((error) => {
+          //       console.error(
+          //         "Error sending audio chunk to Django API for translation:",
+          //         error
+          //       );
+          //     })
+          //     .finally(() => {
+          //       audioChunks = [];
+          //     });
+          // };
 
-              // Clear the timer to stop capturing
-              clearInterval(timer);
-            }
-          }, 1000); // Capture audio every 1 second
+          // mediaRecorder.ondataavailable = (event) => {
+          //   if (event.data.size > 0) {
+          //     audioChunks.push(event.data);
+          //   }
+          // };
 
-          // Set a timeout to stop capturing after 5 seconds
-          setTimeout(() => {
-            clearInterval(timer);
-          }, 5000);
+          // mediaRecorder.onstop = () => {
+          //   sendDataToAPI();
+          //   clearInterval(intervalId);
+          // };
+
+          // mediaRecorder.start();
+
+          // intervalId = setInterval(() => {
+          //   mediaRecorder.stop();
+          //   mediaRecorder.start();
+          // }, 5000);
         },
+
         onVoiceStop: () => {
           // Voice activity has stopped
           console.log("audio stop");
