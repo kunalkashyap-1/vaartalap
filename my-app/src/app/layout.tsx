@@ -6,8 +6,9 @@ import { SocketProvider } from "../components/socketProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Echo",
-  description: "Echo is a video conferencing app",
+  title: "Vaartalap",
+  description:
+    "Vaartalap is a video conferencing app powered by whisper to provide real time transcription and translation with essesnce of connecting the world at core.",
 };
 
 export default function RootLayout({

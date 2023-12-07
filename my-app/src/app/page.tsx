@@ -62,7 +62,7 @@ const Home = () => {
           }}
         >
           <Image alt="logo" width={40} height={40} src="/logo.png" />
-          <h1 className="text-3xl ml-2 font-semibold">Echo</h1>
+          <h1 className="text-3xl ml-2 font-semibold">Vaartalap</h1>
         </div>
         <button
           className="bg-purple-700 font-semibold rounded-lg p-3 text-white hover:bg-purple-600 transition-colors"
