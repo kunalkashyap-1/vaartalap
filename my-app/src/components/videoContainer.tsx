@@ -1,30 +1,32 @@
 "use client";
 import React, { useEffect, useCallback, useState } from "react";
 import ReactPlayer from "react-player";
-import peer from "../service/peer";
+import peerService from "../service/peer";
 import { useSocket } from "../components/socketProvider";
-import vad from "voice-activity-detection";
+import useVAD from "@/hooks/useVAD";
+import useMediaDevices from "@/hooks/useMediaDevices";
+const peer = new peerService();
 
 const VideoContainer = () => {
-  const {
-    socket,
-    mic,
-    setMic,
-    camera,
-    setCamera,
-    caption,
-    setCaption,
-    screenShare,
-    setScreenShare,
-    participantList,
-    setParticipantList,
-  } = useSocket();
+  const { socket, mic, camera } = useSocket();
   const [remoteSocketId, setRemoteSocketId] = useState(null);
   const [myStream, setMyStream] = useState<any>();
   const [remoteStream, setRemoteStream] = useState<any>();
   const [onCall, setOnCall] = useState<boolean>(false);
-  let language = "hi";
-  let translate = "true";
+
+  useEffect(() => {
+    const fetchStream = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true, // Always get the audio track
+        video: true, // Always get the video track
+      });
+      setMyStream(stream);
+    };
+    fetchStream();
+  }, []);
+
+  useVAD(myStream, mic);
+  useMediaDevices(mic, camera, myStream, setMyStream);
 
   const handleUserJoined = useCallback(({ email, id }: any) => {
     console.log(`Email ${email} joined room`);
@@ -87,7 +89,7 @@ const VideoContainer = () => {
 
   useEffect(() => {
     peer.peer?.addEventListener("track", async (ev) => {
-      const remoteStream = ev.streams;
+      const remoteStream: any = ev.streams;
       console.log("GOT TRACKS!!");
       setRemoteStream(remoteStream[0]);
     });
@@ -107,127 +109,7 @@ const VideoContainer = () => {
       socket?.off("peer:nego:needed", handleNegoNeedIncomming);
       socket?.off("peer:nego:final", handleNegoNeedFinal);
     };
-  }, [
-    socket,
-    handleUserJoined,
-    handleIncommingCall,
-    handleCallAccepted,
-    handleNegoNeedIncomming,
-    handleNegoNeedFinal,
-  ]);
-
-  // useEffect to fetch stream and set it to myStream state
-  useEffect(() => {
-    const fetchStream = async () => {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true, // Always get the audio track
-        video: true, // Always get the video track
-      });
-      setMyStream(stream);
-    };
-    fetchStream();
   }, []);
-
-  // useEffect to handle VAD
-  useEffect(() => {
-    if (myStream) {
-      const audioContext = new AudioContext();
-      const source = audioContext.createMediaStreamSource(myStream);
-
-      vad(audioContext, myStream, {
-        fftSize: 1024,
-        bufferLen: 1024,
-        smoothingTimeConstant: 0.2,
-        minCaptureFreq: 85,
-        maxCaptureFreq: 255,
-        noiseCaptureDuration: 1000,
-        minNoiseLevel: 0.3,
-        maxNoiseLevel: 0.7,
-        avgNoiseMultiplier: 1.2,
-        onVoiceStart: () => {
-          console.log("audio started");
-
-          // const mediaRecorder = new MediaRecorder(myStream);
-          // let audioChunks: any = [];
-          // let intervalId: any;
-
-          // const sendDataToAPI = () => {
-          //   const blob = new Blob(audioChunks, { type: "audio/wav" });
-          //   const formData = new FormData();
-          //   formData.append("audio", blob, "audio_chunk.wav");
-          //   formData.append("translate",translate);
-          //   formData.append("language",language);
-
-          //   fetch("http://localhost:8000/api/process/", {
-          //     method: "POST",
-          //     body: formData,
-          //   })
-          //     .then((response) => {
-          //       if (response.ok) {
-          //         return response.json();
-          //       } else {
-          //         throw new Error(
-          //           `Django API returned non-OK status: ${response.status}`
-          //         );
-          //       }
-          //     })
-          //     .then((data) => {
-          //       console.log("Django API translation response:", data);
-          //     })
-          //     .catch((error) => {
-          //       console.error(
-          //         "Error sending audio chunk to Django API for translation:",
-          //         error
-          //       );
-          //     })
-          //     .finally(() => {
-          //       audioChunks = [];
-          //     });
-          // };
-
-          // mediaRecorder.ondataavailable = (event) => {
-          //   if (event.data.size > 0) {
-          //     audioChunks.push(event.data);
-          //   }
-          // };
-
-          // mediaRecorder.onstop = () => {
-          //   sendDataToAPI();
-          //   clearInterval(intervalId);
-          // };
-
-          // mediaRecorder.start();
-
-          // intervalId = setInterval(() => {
-          //   mediaRecorder.stop();
-          //   mediaRecorder.start();
-          // }, 5000);
-        },
-
-        onVoiceStop: () => {
-          // Voice activity has stopped
-          console.log("audio stop");
-        },
-        onUpdate: (val: number) => {
-          // Update callback if needed
-        },
-      });
-    }
-  }, [myStream]);
-
-  // useEffect to handle turning on and off camera and mic
-  useEffect(() => {
-    if (myStream) {
-      const videoTrack = myStream.getVideoTracks()[0];
-      const audioTrack = myStream.getAudioTracks()[0];
-      if (videoTrack) {
-        videoTrack.enabled = camera;
-      }
-      if (audioTrack) {
-        audioTrack.enabled = mic;
-      }
-    }
-  }, [myStream, camera, mic]);
 
   return (
     <section className="flex-1" style={{ backgroundColor: "rgb(28,30,32)" }}>
