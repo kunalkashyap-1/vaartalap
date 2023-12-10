@@ -1,65 +1,82 @@
 "use client";
 import { useEffect } from "react";
+import peerService from "../service/peer";
 
 const useMediaDevices = (
   mic: boolean,
   camera: boolean,
   myStream: MediaStream | null,
-  setMyStream: (stream: MediaStream | null) => void
+  setMyStream: (stream: MediaStream | null) => void,
+  peer: peerService
 ) => {
-  // useEffect to handle turning on and off camera and mic
+  // useEffect to handle turning on and off microphone
   useEffect(() => {
     if (myStream) {
-    //   const videoTrack = myStream.getVideoTracks()[0];
       const audioTrack = myStream.getAudioTracks()[0];
-    //   if (videoTrack) {
-    //     videoTrack.enabled = camera;
-    //   }
       if (audioTrack) {
         audioTrack.enabled = mic;
       }
     }
-
   }, [mic]);
 
+  // useEffect to handle turning on and off camera
   useEffect(() => {
     const cameraToggle = async () => {
       if (myStream) {
-        // Check if there's an existing audio track
-        const audioTrack = myStream.getAudioTracks()[0];
-  
         try {
           if (camera) {
-            // Create a new stream with video track only
+            // Turn on the camera
             const videoStream = await navigator.mediaDevices.getUserMedia({
               video: true,
             });
-  
-            // Use the existing audio track if available
-            if (audioTrack) {
-              // Get the video track from the new stream
-              const videoTrack = videoStream.getVideoTracks()[0];
-  
-              // Replace the existing video track with the new one
-              myStream.removeTrack(myStream.getVideoTracks()[0]);
-              myStream.addTrack(videoTrack);
-            } else {
-              // If there's no existing audio track, update the stream entirely
-              setMyStream(videoStream);
+
+            // Replace the video track in the existing stream
+            const videoTrack = videoStream.getVideoTracks()[0];
+            // myStream.getVideoTracks().forEach((track) => track.stop());
+            myStream.removeTrack(myStream.getVideoTracks()[0]);
+            myStream.addTrack(videoTrack);
+
+            // Replace the video track in the peer connection
+            const senders = peer.peer?.getSenders();
+            const videoSender = senders?.find(
+              (sender) => sender.track?.kind === "video"
+            );
+
+            if (videoSender) {
+              // Replace the track in the remote peer connection
+              videoSender
+                .replaceTrack(videoTrack)
+                .then(() => {
+                  // console.log("Video track replaced successfully.");
+                })
+                .catch((error) => {
+                  console.error("Error replacing video track:", error);
+                });
             }
+
+            // Update the state with the modified stream
+            // setMyStream(myStream);
           } else {
-            // Stop the video track and keep the audio track
-            myStream.getVideoTracks().forEach((track: any) => track.stop());
+            // Turn off the camera
+            myStream.getVideoTracks().forEach((track) => track.stop());
           }
         } catch (error) {
           console.error("Error toggling camera:", error);
         }
       }
     };
-  
+
     cameraToggle();
-  }, [camera, setMyStream, myStream]);
-  
+  }, [camera]);
+
+  // Cleanup function to stop tracks when the component unmounts
+  // useEffect(() => {
+  //   return () => {
+  //     if (myStream) {
+  //       myStream.getTracks().forEach(track => track.stop());
+  //     }
+  //   };
+  // }, []);
 };
 
 export default useMediaDevices;

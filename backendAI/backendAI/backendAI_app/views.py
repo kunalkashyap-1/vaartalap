@@ -1,22 +1,22 @@
 import os
-import re
+# import re
 import tempfile
-import uuid
+# import uuid
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from pydub import AudioSegment
-import torchaudio
+# from pydub import AudioSegment
+# import torchaudio
 import whisper
 from deep_translator import GoogleTranslator
-from speechbrain.pretrained import HIFIGAN, Tacotron2
+# from speechbrain.pretrained import HIFIGAN, Tacotron2
 
 
 # Load TTS model
-tacotron2 = Tacotron2.from_hparams(source="speechbrain/tts-tacotron2-ljspeech", savedir="tmpdir_tts")
-hifi_gan = HIFIGAN.from_hparams(source="speechbrain/tts-hifigan-ljspeech", savedir="tmpdir_vocoder")
+# tacotron2 = Tacotron2.from_hparams(source="speechbrain/tts-tacotron2-ljspeech", savedir="tmpdir_tts")
+# hifi_gan = HIFIGAN.from_hparams(source="speechbrain/tts-hifigan-ljspeech", savedir="tmpdir_vocoder")
 
-# TTS file prefix
+# constants
 speech_tts_prefix = "speech-tts-"
 wav_suffix = ".wav"
 opus_suffix = ".opus"
@@ -33,26 +33,26 @@ def clean_tmp():
     print("[Speech REST API] Temporary files cleaned!")
 
 # Preprocess text to replace numerals with words
-def preprocess_text(text):
-    text = re.sub(r'\d+', lambda m: num2words(int(m.group(0))), text)
-    return text
+# def preprocess_text(text):
+#     text = re.sub(r'\d+', lambda m: num2words(int(m.group(0))), text)
+#     return text
 
-# Run TTS and save file
-# Returns the path to the file
-def run_tts_and_save_file(text):
-    # Running the TTS
-    mel_outputs, mel_length, alignment = tacotron2.encode_batch([text])
+# # Run TTS and save file
+# # Returns the path to the file
+# def run_tts_and_save_file(text):
+#     # Running the TTS
+#     mel_outputs, mel_length, alignment = tacotron2.encode_batch([text])
 
-    # Running Vocoder (spectrogram-to-waveform)
-    waveforms = hifi_gan.decode_batch(mel_outputs)
+#     # Running Vocoder (spectrogram-to-waveform)
+#     waveforms = hifi_gan.decode_batch(mel_outputs)
 
-    # Get temporary directory
-    tmp_dir = tempfile.gettempdir()
+#     # Get temporary directory
+#     tmp_dir = tempfile.gettempdir()
 
-    # Save wav to temporary file
-    tmp_path_wav = os.path.join(tmp_dir, speech_tts_prefix + str(uuid.uuid4()) + wav_suffix)
-    torchaudio.save(tmp_path_wav, waveforms.squeeze(1), 22050)
-    return tmp_path_wav
+#     # Save wav to temporary file
+#     tmp_path_wav = os.path.join(tmp_dir, speech_tts_prefix + str(uuid.uuid4()) + wav_suffix)
+#     torchaudio.save(tmp_path_wav, waveforms.squeeze(1), 22050)
+#     return tmp_path_wav
 
 
 @csrf_exempt
@@ -60,9 +60,11 @@ def run_tts_and_save_file(text):
 def process_audio(request):
     try:
         audio_file = request.FILES["audio"]
-        language = request.POST.get("language", '').lower()
-        is_translate_request = request.POST.get("translate", '').lower() == "true"
+        # language = request.POST.get("language", '').lower()
+        # is_translate_request = request.POST.get("translate", '').lower() == "true"
         task = "translate"
+        language="hi"
+        is_translate_request=True
         # Save the audio file locally
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             temp_file.write(audio_file.read())

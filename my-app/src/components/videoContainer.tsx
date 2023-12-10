@@ -13,6 +13,8 @@ const VideoContainer = () => {
   const [myStream, setMyStream] = useState<any>();
   const [remoteStream, setRemoteStream] = useState<any>();
   const [onCall, setOnCall] = useState<boolean>(false);
+  const [trancribedText,setTranscribedText] = useState<string>("");
+  const [translatedText,setTranslatedText] = useState<string>("");
 
   useEffect(() => {
     const fetchStream = async () => {
@@ -25,11 +27,8 @@ const VideoContainer = () => {
     fetchStream();
   }, []);
 
-  useVAD(myStream, mic);
-  useMediaDevices(mic, camera, myStream, setMyStream);
-
   const handleUserJoined = useCallback(({ email, id }: any) => {
-    console.log(`Email ${email} joined room`);
+    // console.log(`Email ${email} joined room`);
     setRemoteSocketId(id);
   }, []);
 
@@ -41,7 +40,7 @@ const VideoContainer = () => {
   const handleIncommingCall = useCallback(
     async ({ from, offer }: any) => {
       setRemoteSocketId(from);
-      console.log(`Incoming Call`, from, offer);
+      // console.log(`Incoming Call`, from, offer);
       const ans = await peer.getAnswer(offer);
       socket?.emit("call:accepted", { to: from, ans });
     },
@@ -57,7 +56,7 @@ const VideoContainer = () => {
   const handleCallAccepted = useCallback(
     ({ from, ans }: any) => {
       peer.setLocalDescription(ans);
-      console.log("Call Accepted!");
+      // console.log("Call Accepted!");
       sendStreams();
     },
     [sendStreams]
@@ -67,6 +66,9 @@ const VideoContainer = () => {
     const offer = await peer.getOffer();
     socket?.emit("peer:nego:needed", { offer, to: remoteSocketId });
   }, [remoteSocketId, socket]);
+
+  useVAD(myStream, mic,setTranscribedText,setTranslatedText);
+  useMediaDevices(mic, camera, myStream, setMyStream,peer);
 
   useEffect(() => {
     peer.peer?.addEventListener("negotiationneeded", handleNegoNeeded);
@@ -90,7 +92,7 @@ const VideoContainer = () => {
   useEffect(() => {
     peer.peer?.addEventListener("track", async (ev) => {
       const remoteStream: any = ev.streams;
-      console.log("GOT TRACKS!!");
+      // console.log("GOT TRACKS!!");
       setRemoteStream(remoteStream[0]);
     });
   }, []);
@@ -109,7 +111,14 @@ const VideoContainer = () => {
       socket?.off("peer:nego:needed", handleNegoNeedIncomming);
       socket?.off("peer:nego:final", handleNegoNeedFinal);
     };
-  }, []);
+  }, [
+    handleUserJoined,
+    handleIncommingCall,
+    handleCallAccepted,
+    handleNegoNeedIncomming,
+    handleNegoNeedFinal,
+    socket,
+  ]);
 
   return (
     <section className="flex-1" style={{ backgroundColor: "rgb(28,30,32)" }}>
