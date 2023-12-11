@@ -58,13 +58,22 @@ def clean_tmp():
 @csrf_exempt
 @require_POST
 def process_audio(request):
+    """
+    Endpoint for processing audio files, performing transcription, and optionally translation.
+
+    Args:
+        request (HttpRequest): The HTTP request object. Containing the audio binary and parametrs 
+        such as translation(boolean) and language(string)
+
+    Returns:
+        JsonResponse: JSON response containing the transcription and optional translation.
+    """
     try:
         audio_file = request.FILES["audio"]
-        # language = request.POST.get("language", '').lower()
-        # is_translate_request = request.POST.get("translate", '').lower() == "true"
+        language = request.POST.get("language", '').lower()
+        is_translate_request = request.POST.get("translate", '').lower() == "true"
         task = "translate"
-        language="hi"
-        is_translate_request=True
+
         # Save the audio file locally
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             temp_file.write(audio_file.read())
@@ -84,7 +93,7 @@ def process_audio(request):
                     # If the language is not English, use GoogleTranslator
                     translation = GoogleTranslator(source='auto', target=language).translate(transcription["text"])
                     transcription = {'transcription': transcription, 'translation': translation}
-                result = {'transcription': transcription}
+                result = transcription
 
             else:
                 transcription = model.transcribe(audio_file, fp16=False)

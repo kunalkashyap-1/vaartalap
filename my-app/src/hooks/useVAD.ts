@@ -1,13 +1,61 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import vad from "voice-activity-detection";
+import { useSocket } from "@/components/socketProvider";
 
 const useVAD = (
-  myStream: MediaStream | null,
-  mic: boolean,
-  setTranscribedText: (transcribedText:string) => void,
-  setTranslatedText: (translatedText:string) => void
+  remoteStream: MediaStream,
+  handleCaptionChange:(newCaption: string) => void
 ) => {
+  const { caption, translate, language } = useSocket();
+  const intervalIdRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<any[]>([]);
+
+  const sendDataToAPI = useCallback(() => {
+    if (!caption) {
+      audioChunksRef.current = [];
+      return;
+    }
+    if (audioChunksRef.current.length > 0) {
+      const blob = new Blob(audioChunksRef.current, { type: "audio/wav" });
+      const formData = new FormData();
+      formData.append("audio", blob, "audio_chunk.wav");
+      translate ? formData.append("language", language) : null;
+      formData.append("translate", `${translate}`);
+
+      // console.log("Sending audio chunk to API");
+      fetch("http://localhost:8000/api/process/", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error(
+              `Django API returned non-OK status: ${response.status}`
+            );
+          }
+        })
+        .then((data) => {
+          // console.log("Django API translation response:", data);
+          translate
+            ? handleCaptionChange(data.translation)
+            : handleCaptionChange(data.transcription.text);
+        })
+        .catch((error) => {
+          // console.error(
+          //   "Error sending audio chunk to Django API for translation:",
+          //   error
+          // );
+        })
+        .finally(() => {
+          audioChunksRef.current = [];
+        });
+    }
+  }, [caption]); // Include caption in the dependency array
+
   useEffect(() => {
     const fftSize = 1024;
     const bufferLen = 1024;
@@ -19,21 +67,15 @@ const useVAD = (
     const maxNoiseLevel = 0.7;
     const avgNoiseMultiplier = 1.2;
 
-    let audioChunks: any = [];
-    let mediaRecorder: MediaRecorder | null = null;
-    let intervalId: any;
-
-    if (myStream) {
-      const audioTrack = myStream.getAudioTracks()[0];
+    if (remoteStream) {
+      const audioTrack = remoteStream.getAudioTracks()[0];
 
       if (audioTrack) {
         const audioContext = new AudioContext();
-        const source = audioContext?.createMediaStreamSource(myStream);
-        mediaRecorder = new MediaRecorder(myStream);
+        const source = audioContext?.createMediaStreamSource(remoteStream);
+        mediaRecorderRef.current = new MediaRecorder(remoteStream);
 
-        let isSpeaking = false;
-
-        const vadInstance = vad(audioContext, myStream, {
+        const vadInstance = vad(audioContext, remoteStream, {
           fftSize,
           bufferLen,
           smoothingTimeConstant,
@@ -46,73 +88,49 @@ const useVAD = (
           onVoiceStart: () => {
             // console.log("audio started");
             // Start the MediaRecorder when voice activity starts
-            if (mediaRecorder) {
-              mediaRecorder.start();
-              intervalId = setInterval(() => {
-                mediaRecorder?.stop();
-                mediaRecorder?.start();
+            if (mediaRecorderRef.current) {
+              mediaRecorderRef.current.start();
+              intervalIdRef.current = setInterval(() => {
+                mediaRecorderRef.current?.stop();
+                mediaRecorderRef.current?.start();
               }, 5000);
             }
           },
           onVoiceStop: () => {
             // console.log("audio stop");
             // Stop the MediaRecorder when voice activity stops
-            if (mediaRecorder) {
-              mediaRecorder.stop();
-              clearInterval(intervalId);
+            if (mediaRecorderRef.current) {
+              mediaRecorderRef.current.stop();
+              clearInterval(intervalIdRef.current);
+            }
+            sendDataToAPI();
+          },
+          onUpdate: (val: number) => {
+            if (!caption) {
+              // Stop mediaRecorder and clear the interval
+              if (mediaRecorderRef.current) {
+                mediaRecorderRef.current.stop();
+              }
+              clearInterval(intervalIdRef.current);
+              return;
             }
           },
-          onUpdate: (val: number) => {},
         });
 
         // Handle data availability and initiate API call
-        mediaRecorder.ondataavailable = (event) => {
+        mediaRecorderRef.current.ondataavailable = (event) => {
           if (event.data.size > 0) {
-            audioChunks.push(event.data);
+            audioChunksRef.current.push(event.data);
           }
         };
 
-        mediaRecorder.onstop = () => {
+        mediaRecorderRef.current.onstop = () => {
           // Check if the MediaRecorder is in the "recording" state before initiating the API call
-          if (mediaRecorder && mediaRecorder.state === "recording") {
+          if (
+            mediaRecorderRef.current &&
+            mediaRecorderRef.current.state === "recording"
+          ) {
             sendDataToAPI();
-          }
-        };
-
-        const sendDataToAPI = () => {
-          if (audioChunks.length > 0) {
-            const blob = new Blob(audioChunks, { type: "audio/wav" });
-            const formData = new FormData();
-            formData.append("audio", blob, "audio_chunk.wav");
-
-            // console.log("Sending audio chunk to API");
-            fetch("http://localhost:8000/api/process/", {
-              method: "POST",
-              body: formData,
-            })
-              .then((response) => {
-                if (response.ok) {
-                  return response.json();
-                } else {
-                  throw new Error(
-                    `Django API returned non-OK status: ${response.status}`
-                  );
-                }
-              })
-              .then((data) => {
-                // console.log("Django API translation response:", data);
-                setTranscribedText(data.transcription.transcription.text)
-                setTranslatedText(data.transcription.translation)
-              })
-              .catch((error) => {
-                // console.error(
-                //   "Error sending audio chunk to Django API for translation:",
-                //   error
-                // );
-              })
-              .finally(() => {
-                audioChunks = [];
-              });
           }
         };
 
@@ -120,13 +138,14 @@ const useVAD = (
           // Cleanup when the component unmounts
           vadInstance.destroy();
           audioContext.close();
-          if (mediaRecorder) {
-            mediaRecorder.stop();
+          if (mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop();
           }
+          clearInterval(intervalIdRef.current);
         };
       }
     }
-  }, [myStream]);
+  }, [remoteStream, caption, sendDataToAPI]); // Include caption and sendDataToAPI in the dependency array
 };
 
 export default useVAD;

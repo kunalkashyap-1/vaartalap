@@ -1,4 +1,3 @@
-"use client";
 // ButtonsRow.js
 import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
 import {
@@ -6,8 +5,6 @@ import {
   MicOffOutlined,
   VideocamOutlined,
   VideocamOffOutlined,
-  ScreenShareOutlined,
-  StopScreenShareOutlined,
   ClosedCaptionOffOutlined,
   ClosedCaptionDisabledOutlined,
   CallEndOutlined,
@@ -15,6 +12,15 @@ import {
   MessageOutlined,
   PeopleAltOutlined,
 } from "@mui/icons-material";
+import {
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Switch,
+  FormGroup,
+  FormControlLabel,
+} from "@mui/material";
 import { useSocket } from "./socketProvider";
 
 interface ButtonsProps {
@@ -33,7 +39,7 @@ export default function ButtonsRow({
   roomID,
 }: ButtonsProps) {
   const [infoVisible, setInfoVisible] = useState(false);
-  const [localUserID,setLocalUserID] = useState<string | null>();
+  const [localUserID, setLocalUserID] = useState<string | null>();
   const {
     mic,
     setMic,
@@ -41,20 +47,54 @@ export default function ButtonsRow({
     setCamera,
     caption,
     setCaption,
-    screenShare,
-    setScreenShare,
+    translate,
+    setTranslate,
+    language,
+    setLanguage,
   } = useSocket();
 
-  useEffect(()=>{
+  useEffect(() => {
     setLocalUserID(window.localStorage.getItem("localUserID"));
-  },[]);
+  }, []);
 
   return (
     <div
       className="flex flex-row-reverse justify-between items-center p-4"
       style={{ backgroundColor: "#333" }}
     >
-      <div className="space-x-4">
+      <div className="flex justify-center items-center space-x-4">
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Switch
+                color="secondary"
+                size="medium"
+                onChange={() => setTranslate((prevTranslate) => !prevTranslate)}
+              />
+            }
+            label={<span className="text-white text-lg">Translate</span>}
+            labelPlacement="start"
+          />
+        </FormGroup>
+
+        <FormControl className="w-32">
+          {/* <InputLabel id="language-select-label">Language</InputLabel> */}
+          <Select
+            labelId="language-select-label"
+            id="language-select"
+            className="text-white border rounded bg-grey-300 focus:outline-none focus:border-white"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as string)}
+          >
+            <MenuItem value="en">English</MenuItem>
+            <MenuItem value="hi">Hindi</MenuItem>
+            <MenuItem value="pl">Polish</MenuItem>
+            <MenuItem value="fr">French</MenuItem>
+            <MenuItem value="it">Italian</MenuItem>
+            <MenuItem value="de">German</MenuItem>
+            <MenuItem value="ja">Japanese</MenuItem>
+          </Select>
+        </FormControl>
         <button
           onClick={() => setIsChat((prevIsChat: boolean) => !prevIsChat)}
           className={`${
@@ -62,14 +102,6 @@ export default function ButtonsRow({
           }  place-content-center text-white rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
         >
           <MessageOutlined />
-        </button>
-        <button
-          onClick={() => setIsList((prev: boolean) => !prev)}
-          className={`${
-            isList ? "bg-purple-300" : ""
-          }  place-content-center text-white rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
-        >
-          <PeopleAltOutlined />
         </button>
         <button
           onClick={() => setInfoVisible((prev) => !prev)}
@@ -85,62 +117,48 @@ export default function ButtonsRow({
         )}
       </div>
 
-      <div className="flex flex-1 justify-around items-center ">
-        <div className=" space-x-4">
-          <button
-            onClick={() => setMic((prevMic) => !prevMic)}
-            className={`${
-              mic ? "bg-gray-300" : "bg-red-500 text-white"
-            }  place-content-center rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
-          >
-            {mic ? <MicNoneOutlined /> : <MicOffOutlined />}
-          </button>
-          <button
-            onClick={() => {
-              setCamera((prevCamera) => !prevCamera);
-            }}
-            className={`${
-              camera ? "bg-gray-300" : "bg-red-500 text-white"
-            }  rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
-          >
-            {camera ? <VideocamOutlined /> : <VideocamOffOutlined />}
-          </button>
-          <button
-            onClick={() => setScreenShare((prevShare) => !prevShare)}
-            className={`${
-              !screenShare ? "" : "bg-red-500 text-white"
-            }  rounded-full p-3 text-white hover:bg-opacity-80 transition duration-300`}
-          >
-            {!screenShare ? (
-              <ScreenShareOutlined />
-            ) : (
-              <StopScreenShareOutlined />
-            )}
-          </button>
-          <button
-            onClick={() => setCaption((prevCaption) => !prevCaption)}
-            className={`${
-              !caption ? "" : "bg-red-500 text-white"
-            }  rounded-full text-white place-content-center p-3 hover:bg-opacity-80 transition duration-300`}
-          >
-            {!caption ? (
-              <ClosedCaptionOffOutlined />
-            ) : (
-              <ClosedCaptionDisabledOutlined />
-            )}
-          </button>
-          <button
-            onClick={
-              () => {
-                window.localStorage.removeItem("localUserID");
-                window.location.replace("/");
-              } /* Implement your logic for ending the call */
-            }
-            className="bg-red-500 text-white rounded-full p-3 hover:bg-opacity-80 transition duration-300"
-          >
-            <CallEndOutlined />
-          </button>
-        </div>
+      <div className="flex flex-1 justify-center items-center space-x-4">
+        <button
+          onClick={() => setMic((prevMic) => !prevMic)}
+          className={`${
+            mic ? "bg-gray-300" : "bg-red-500 text-white"
+          }  place-content-center rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
+        >
+          {mic ? <MicNoneOutlined /> : <MicOffOutlined />}
+        </button>
+        <button
+          onClick={() => {
+            setCamera((prevCamera) => !prevCamera);
+          }}
+          className={`${
+            camera ? "bg-gray-300" : "bg-red-500 text-white"
+          }  rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
+        >
+          {camera ? <VideocamOutlined /> : <VideocamOffOutlined />}
+        </button>
+
+        <button
+          onClick={() => setCaption((prevCaption) => !prevCaption)}
+          className={`${
+            !caption ? "" : "bg-red-500 text-white"
+          }  rounded-full text-white place-content-center p-3 hover:bg-opacity-80 transition duration-300`}
+        >
+          {!caption ? (
+            <ClosedCaptionOffOutlined />
+          ) : (
+            <ClosedCaptionDisabledOutlined />
+          )}
+        </button>
+
+        <button
+          onClick={() => {
+            window.localStorage.removeItem("localUserID");
+            window.location.replace("/");
+          }}
+          className="bg-red-500 text-white rounded-full p-3 hover:bg-opacity-80 transition duration-300"
+        >
+          <CallEndOutlined />
+        </button>
       </div>
     </div>
   );

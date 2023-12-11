@@ -13,8 +13,28 @@ const VideoContainer = () => {
   const [myStream, setMyStream] = useState<any>();
   const [remoteStream, setRemoteStream] = useState<any>();
   const [onCall, setOnCall] = useState<boolean>(false);
-  const [trancribedText,setTranscribedText] = useState<string>("");
-  const [translatedText,setTranslatedText] = useState<string>("");
+  const [captionText, setCaptionText] = useState<string>("");
+  const [captionTimer, setCaptionTimer] = useState<NodeJS.Timeout | null>(null);
+
+  const handleCaptionChange = useCallback(
+    (newCaption: string) => {
+      setCaptionText(newCaption);
+
+      // Clear existing timer
+      if (captionTimer) {
+        clearTimeout(captionTimer);
+      }
+
+      // Set a new timer to make the caption disappear after 5 seconds
+      const newTimer = setTimeout(() => {
+        setCaptionText("");
+      }, 5000);
+
+      // Update the timer state
+      setCaptionTimer(newTimer);
+    },
+    [captionTimer]
+  );
 
   useEffect(() => {
     const fetchStream = async () => {
@@ -67,8 +87,8 @@ const VideoContainer = () => {
     socket?.emit("peer:nego:needed", { offer, to: remoteSocketId });
   }, [remoteSocketId, socket]);
 
-  useVAD(myStream, mic,setTranscribedText,setTranslatedText);
-  useMediaDevices(mic, camera, myStream, setMyStream,peer);
+  useVAD(remoteStream, handleCaptionChange);
+  useMediaDevices(mic, camera, myStream, setMyStream, peer);
 
   useEffect(() => {
     peer.peer?.addEventListener("negotiationneeded", handleNegoNeeded);
@@ -156,6 +176,11 @@ const VideoContainer = () => {
               </h4>
             </div>
           )}
+
+          {/* Caption Display */}
+          {captionText.length > 0 && <div className="absolute bottom-5 left-5 text-white caption bg-black bg-opacity-70 rounded-lg p-2">
+            <p>{captionText}</p>
+          </div>}
         </div>
 
         <div className="absolute bottom-5 right-5">

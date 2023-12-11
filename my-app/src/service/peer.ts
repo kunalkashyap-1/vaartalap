@@ -39,5 +39,13 @@ export default class PeerService {
       return offer;
     }
   }
+
+  close(): void {
+    if (this.peer) {
+      // Close peer connection and release resources
+      this.peer.close();
+      this.peer = undefined;
+    }
+  }
 }
 

@@ -21,8 +21,12 @@ interface ISocketContext {
   setCamera: Dispatch<SetStateAction<boolean>>;
   caption: boolean;
   setCaption: Dispatch<SetStateAction<boolean>>;
-  screenShare: boolean;
-  setScreenShare: Dispatch<SetStateAction<boolean>>;
+  translate: boolean;
+  setTranslate: Dispatch<SetStateAction<boolean>>;  
+  language: string;
+  setLanguage: Dispatch<SetStateAction<string>>;
+  // screenShare: boolean;
+  // setScreenShare: Dispatch<SetStateAction<boolean>>;
   participantList: {
     connID: string;
     userID: string;
@@ -51,8 +55,12 @@ const SocketContext = createContext<ISocketContext>({
   setCamera: () => {},
   caption: false,
   setCaption: () => {},
-  screenShare: false,
-  setScreenShare: () => {},
+  translate: false,
+  setTranslate: () => {},
+  language: "en",
+  setLanguage: () => {},
+  // screenShare: false,
+  // setScreenShare: () => {},
   participantList: [],
   setParticipantList: () => {},
 });
@@ -66,7 +74,9 @@ export const SocketProvider: FC<SocketProviderProps> = ({ children }) => {
   const [mic, setMic] = useState(true);
   const [camera, setCamera] = useState(true);
   const [caption, setCaption] = useState(false);
-  const [screenShare, setScreenShare] = useState(false);
+  const [translate, setTranslate] = useState(false);
+  const [language, setLanguage] = useState("");
+  // const [screenShare, setScreenShare] = useState(false);
   const [participantList, setParticipantList] = useState<
     {
       connID: string;
@@ -94,10 +104,12 @@ export const SocketProvider: FC<SocketProviderProps> = ({ children }) => {
         setCamera,
         caption,
         setCaption,
-        screenShare,
-        setScreenShare,
+        // screenShare,
+        // setScreenShare,
         participantList,
         setParticipantList,
+        translate, setTranslate,
+        language, setLanguage,
       }}
     >
       {children}
