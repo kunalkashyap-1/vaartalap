@@ -25,7 +25,7 @@ const useVAD = (
       formData.append("translate", `${translate}`);
 
       // console.log("Sending audio chunk to API");
-      fetch("http://localhost:8000/api/process/", {
+      fetch(`${process.env.NEXT_PUBLIC_AI_ENDPOINT}/api/process/`, {
         method: "POST",
         body: formData,
       })
