@@ -13,16 +13,6 @@ export default class PeerService {
             ],
           },
           {
-            urls: "turn:turn01.hubl.in?transport=udp",
-            credential: "", // Add your credential here
-            username: "",   // Add your username here
-          },
-          {
-            urls: "turn:turn02.hubl.in?transport=tcp",
-            credential: "", // Add your credential here
-            username: "",   // Add your username here
-          },
-          {
             urls: "turn:numb.viagenie.ca",
             credential: "muazkh",
             username: "webrtc@live.com",
