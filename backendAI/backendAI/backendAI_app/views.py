@@ -22,7 +22,7 @@ wav_suffix = ".wav"
 opus_suffix = ".opus"
 
 # Load the transcription model
-model = whisper.load_model("base")
+model = whisper.load_model("small")
 
 # Clean temporary files (called every 5 minutes)
 def clean_tmp():

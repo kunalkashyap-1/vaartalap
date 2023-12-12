@@ -7,6 +7,7 @@ const useVAD = (
   remoteStream: MediaStream,
   handleCaptionChange:(newCaption: string) => void
 ) => {
+  const whisperEndpoint =process.env.NEXT_PUBLIC_AI_ENDPOINT ?? "http://127.0.0.1:8000/";
   const { caption, translate, language } = useSocket();
   const intervalIdRef = useRef<any>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -25,7 +26,7 @@ const useVAD = (
       formData.append("translate", `${translate}`);
 
       // console.log("Sending audio chunk to API");
-      fetch(`${process.env.NEXT_PUBLIC_AI_ENDPOINT}/api/process/`, {
+      fetch(`${whisperEndpoint}/api/process/`, {
         method: "POST",
         body: formData,
       })
