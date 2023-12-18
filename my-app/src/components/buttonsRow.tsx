@@ -1,4 +1,3 @@
-// ButtonsRow.js
 import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
 import {
   MicNoneOutlined,
@@ -10,34 +9,102 @@ import {
   CallEndOutlined,
   InfoOutlined,
   MessageOutlined,
-  PeopleAltOutlined,
+  MoreVert,
 } from "@mui/icons-material";
 import {
   MenuItem,
   Select,
   FormControl,
-  InputLabel,
   Switch,
   FormGroup,
   FormControlLabel,
+  IconButton,
+  Menu,
 } from "@mui/material";
 import { useSocket } from "./socketProvider";
 
-interface ButtonsProps {
-  isChat: boolean;
-  setIsChat: Dispatch<SetStateAction<boolean>>;
-  isList: boolean;
-  setIsList: Dispatch<SetStateAction<boolean>>;
-  roomID: string | null;
-}
+const LanguageSelect = ({ language, setLanguage }: any) => (
+  <FormControl className="w-32">
+    <Select
+      labelId="language-select-label"
+      id="language-select"
+      className="text-purple-600 text-lg border rounded bg-grey-300 focus:outline-none focus:border-white"
+      value={language}
+      onChange={(e) => setLanguage(e.target.value as string)}
+    >
+      <MenuItem value="en">English</MenuItem>
+      <MenuItem value="hi">Hindi</MenuItem>
+      <MenuItem value="pl">Polish</MenuItem>
+      <MenuItem value="fr">French</MenuItem>
+      <MenuItem value="it">Italian</MenuItem>
+      <MenuItem value="de">German</MenuItem>
+      <MenuItem value="ja">Japanese</MenuItem>
+    </Select>
+  </FormControl>
+);
 
-export default function ButtonsRow({
+const TranslateSwitch = ({ translate, setTranslate }: any) => (
+  <FormGroup>
+    <FormControlLabel
+      control={
+        <Switch
+          color="secondary"
+          size="medium"
+          onChange={() =>
+            setTranslate((prevTranslate: boolean) => !prevTranslate)
+          }
+        />
+      }
+      label={<span className="text-purple-600 text-xl">Translate</span>}
+      labelPlacement="start"
+    />
+  </FormGroup>
+);
+
+const MenuContent = ({
   isChat,
-  setIsChat,
-  isList,
-  setIsList,
+  translate,
+  infoVisible,
+  localUserID,
   roomID,
-}: ButtonsProps) {
+  handleClose,
+  setTranslate,
+  language,
+  setLanguage,
+  setIsChat,
+  setInfoVisible,
+}: any) => (
+  <>
+  <MenuItem
+    onClick={handleClose}
+    sx={{
+      display: "felx",
+      flexDirection: "column",
+    }}
+  >
+    <TranslateSwitch translate={translate} setTranslate={setTranslate}/>
+    {/* <button
+      onClick={() => setIsChat((prevIsChat: boolean) => !prevIsChat)}
+      className={`${
+        isChat ? "bg-purple-300" : ""
+      }  place-content-center text-white rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
+    >
+      <MessageOutlined />
+    </button> */}
+  </MenuItem>
+  <MenuItem
+  onClick={handleClose}
+  sx={{
+    display: "felx",
+    flexDirection: "column",
+  }}
+>
+  <LanguageSelect language={language} setLanguage={setLanguage} />
+</MenuItem>
+</>
+);
+
+const ButtonsRow = ({ isChat, setIsChat, isList, setIsList, roomID }: any) => {
   const [infoVisible, setInfoVisible] = useState(false);
   const [localUserID, setLocalUserID] = useState<string | null>();
   const {
@@ -52,6 +119,14 @@ export default function ButtonsRow({
     language,
     setLanguage,
   } = useSocket();
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     setLocalUserID(window.localStorage.getItem("localUserID"));
@@ -59,50 +134,55 @@ export default function ButtonsRow({
 
   return (
     <div
-      className="flex flex-row-reverse justify-between items-center p-4"
-      style={{ backgroundColor: "#333" }}
+      className="flex flex-row-reverse justify-between items-center p-4 bg-gray-800"
     >
+      <IconButton
+        className="text-white md:hidden"
+        aria-label="more"
+        id="long-button"
+        aria-controls={open ? "long-menu" : undefined}
+        aria-expanded={open ? "true" : undefined}
+        aria-haspopup="true"
+        onClick={handleClick}
+      >
+        <MoreVert />
+      </IconButton>
+      <Menu
+        id="long-menu"
+        MenuListProps={{
+          "aria-labelledby": "long-button",
+        }}
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+      >
+        <MenuContent
+          isChat={isChat}
+          translate={translate}
+          infoVisible={infoVisible}
+          localUserID={localUserID}
+          roomID={roomID}
+          handleClose={handleClose}
+          setTranslate={setTranslate}
+          language={language}
+          setLanguage={setLanguage}
+          setIsChat={setIsChat}
+          setInfoVisible={setInfoVisible}
+        />
+      </Menu>
       <div className="flex justify-center items-center space-x-4">
-        <FormGroup>
-          <FormControlLabel
-            control={
-              <Switch
-                color="secondary"
-                size="medium"
-                onChange={() => setTranslate((prevTranslate) => !prevTranslate)}
-              />
-            }
-            label={<span className="text-white text-lg">Translate</span>}
-            labelPlacement="start"
-          />
-        </FormGroup>
-
-        <FormControl className="w-32">
-          {/* <InputLabel id="language-select-label">Language</InputLabel> */}
-          <Select
-            labelId="language-select-label"
-            id="language-select"
-            className="text-white border rounded bg-grey-300 focus:outline-none focus:border-white"
-            value={language}
-            onChange={(e) => setLanguage(e.target.value as string)}
-          >
-            <MenuItem value="en">English</MenuItem>
-            <MenuItem value="hi">Hindi</MenuItem>
-            <MenuItem value="pl">Polish</MenuItem>
-            <MenuItem value="fr">French</MenuItem>
-            <MenuItem value="it">Italian</MenuItem>
-            <MenuItem value="de">German</MenuItem>
-            <MenuItem value="ja">Japanese</MenuItem>
-          </Select>
-        </FormControl>
-        <button
+        <div className="hidden md:flex justify-center items-center gap-2">
+        <TranslateSwitch translate={translate} setTranslate={setTranslate} />
+        <LanguageSelect language={language} setLanguage={setLanguage} />
+        </div>
+        {/* <button
           onClick={() => setIsChat((prevIsChat: boolean) => !prevIsChat)}
           className={`${
             isChat ? "bg-purple-300" : ""
           }  place-content-center text-white rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
         >
           <MessageOutlined />
-        </button>
+        </button> */}
         <button
           onClick={() => setInfoVisible((prev) => !prev)}
           className="text-gray-400"
@@ -162,4 +242,6 @@ export default function ButtonsRow({
       </div>
     </div>
   );
-}
+};
+
+export default ButtonsRow;

@@ -29,7 +29,6 @@ const Home = () => {
 
   const handleSubmit = useCallback(
     (e: any) => {
-      // e.preventDefault();
       const fourDigit = Math.floor(Math.random() * 4 * 10000);
       window.localStorage.setItem("localUserID", email);
       socket?.emit("room:join", { email, room: fourDigit.toString() });
@@ -53,10 +52,10 @@ const Home = () => {
   }, [socket, handleJoinRoom]);
 
   return (
-    <div className="bg-gray-100 h-screen">
+    <div className="bg-gray-100 min-h-screen">
       <nav className="navbar bg-white flex justify-between p-4 items-center">
         <div
-          className="flex cursor-pointer"
+          className="flex cursor-pointer items-center"
           onClick={(e) => {
             push("/");
           }}
@@ -73,12 +72,12 @@ const Home = () => {
       </nav>
       <main>
         <div className="hero p-6">
-          <div className="flex justify-between p-4">
+          <div className="flex justify-between flex-col md:flex-row p-4">
             <div className="flex flex-col gap-9">
-              <p className="text-7xl font-semibold text-gray-800 py-12">
+              <p className="text-3xl md:text-7xl font-semibold text-gray-800 py-12">
                 Connect Beyond Borders: Your World, One Click Away
               </p>
-              <div className="flex gap-6 items-center">
+              <div className="flex flex-col md:flex-row gap-6 items-center">
                 <button
                   className="bg-purple-700 rounded-lg p-3 text-white hover:bg-purple-600 transition-colors"
                   onClick={handleOpen}
@@ -98,13 +97,13 @@ const Home = () => {
                   className="bg-purple-700 rounded-lg p-3 text-white hover:bg-purple-600 transition-colors flex items-center"
                   onClick={(e) => push(`/lobby?roomID=${code}`)}
                 >
-                  <LoginOutlinedIcon className="mr-2" />
+                  <LoginOutlinedIcon className="md:mr-2" />
                   Join
                 </button>
               </div>
             </div>
             <Image
-              className="floating"
+              className="floating md:ml-8"
               alt=""
               width={500}
               height={500}
@@ -120,9 +119,6 @@ const Home = () => {
             aria-describedby="modal-modal-description"
           >
             <Box sx={style} className="flex flex-col gap-4 rounded-2xl">
-              {/* <Typography id="modal-modal-title" variant="h6" component="h2">
-                Enter User ID
-              </Typography> */}
               <TextField
                 id="outlined-basic"
                 label="Enter Email ID"
@@ -134,7 +130,7 @@ const Home = () => {
                 }}
               />
               <Button
-                className="bg-green-900 w-1/2"
+                className="bg-green-900 w-full md:w-1/2"
                 variant="contained"
                 color="success"
                 onClick={handleSubmit}
