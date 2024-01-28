@@ -13,7 +13,7 @@ const VideoContainer = () => {
   const [myStream, setMyStream] = useState<any>();
   const [remoteStream, setRemoteStream] = useState<any>();
   const [onCall, setOnCall] = useState<boolean>(false);
-  const [captionText, setCaptionText] = useState<string>("");
+  const [captionText, setCaptionText] = useState<string | null>(null);
   const [captionTimer, setCaptionTimer] = useState<NodeJS.Timeout | null>(null);
 
   const handleCaptionChange = useCallback(
@@ -27,7 +27,7 @@ const VideoContainer = () => {
 
       // Set a new timer to make the caption disappear after 5 seconds
       const newTimer = setTimeout(() => {
-        setCaptionText("");
+        setCaptionText(null);
       }, 5000);
 
       // Update the timer state
@@ -178,7 +178,7 @@ const VideoContainer = () => {
           )}
 
           {/* Caption Display */}
-          {captionText.length > 0 && <div className="absolute bottom-5 left-5 text-white caption bg-black bg-opacity-70 rounded-lg p-2">
+          {captionText && <div className="absolute bottom-5 left-5 text-white caption bg-black bg-opacity-70 rounded-lg p-2">
             <p>{captionText}</p>
           </div>}
         </div>
