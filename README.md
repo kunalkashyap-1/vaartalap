@@ -9,14 +9,8 @@
 - [Flow Chart](#flow-chart)
 - [ASR Model](#asr-model)
 - [System Architecture](#system-architecture)
-- [Client and Server Interaction](#client-and-server-interaction)
-- [Design Analysis](#design-analysis)
 - [Applications](#applications)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Contributing](#contributing)
 - [License](#license)
-- [Contact](#contact)
 
 ## Introduction
 
