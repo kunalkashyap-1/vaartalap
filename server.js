@@ -1,8 +1,10 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const morgan = require("morgan");
 
 const app = express();
+app.use(morgan("tiny"));
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -18,10 +20,20 @@ io.on("connection", (socket) => {
 
   socket.on("room:join", (data) => handleRoomJoin(socket, data));
   socket.on("user:call", ({ to, offer }) => handleUserCall(socket, to, offer));
-  socket.on("call:accepted", ({ to, ans }) => handleCallAccepted(socket, to, ans));
-  socket.on("peer:nego:needed", ({ to, offer }) => handlePeerNegoNeeded(socket, to, offer));
-  socket.on("peer:nego:done", ({ to, ans }) => handlePeerNegoDone(socket, to, ans));
-  
+  socket.on("call:accepted", ({ to, ans }) =>
+    handleCallAccepted(socket, to, ans)
+  );
+  socket.on("peer:nego:needed", ({ to, offer }) =>
+    handlePeerNegoNeeded(socket, to, offer)
+  );
+  socket.on("peer:nego:done", ({ to, ans }) =>
+    handlePeerNegoDone(socket, to, ans)
+  );
+  socket.on("message", ({ roomID, from, message }) => {
+    // console.log(roomID, from, message);
+    handleMessage(roomID, from, message);
+  });
+
   socket.on("disconnect", () => handleDisconnect(socket));
 });
 
@@ -90,6 +102,15 @@ function handlePeerNegoDone(socket, to, ans) {
     io.to(to).emit("peer:nego:final", { from: socket.id, ans });
   } catch (error) {
     console.error(`Error in handlePeerNegoDone: ${error.message}`);
+  }
+}
+
+function handleMessage(room, from, message) {
+  try {
+    io.to(room).emit("message", { from, message });
+    console.log(`Message sent to room ${room}: ${message}`);
+  } catch (error) {
+    console.error(`Error in handleMessage: ${error.message}`);
   }
 }
 

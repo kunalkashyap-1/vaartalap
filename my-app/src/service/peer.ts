@@ -1,9 +1,10 @@
-"use client"
+"use client";
 export default class PeerService {
   public peer: RTCPeerConnection | undefined;
+  public dataChannel: RTCDataChannel | undefined;
 
   constructor() {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       this.peer = new RTCPeerConnection({
         iceServers: [
           {
@@ -39,10 +40,28 @@ export default class PeerService {
           },
         ],
       });
+
+      // Create a data channel named 'chat'
+      this.dataChannel = this.peer.createDataChannel("chat");
+
+      this.dataChannel.onmessage = (event) => {
+        console.log("Received message:", event.data);
+      };
+
+      // Event listener for when the data channel is open
+      this.dataChannel.onopen = (event) => {
+        console.log("Data channel is open");
+      };
+      this.dataChannel.onerror = (error) => {
+        console.log("Data Channel Error:", error);
+      };
+
     }
   }
 
-  async getAnswer(offer: RTCSessionDescriptionInit): Promise<RTCSessionDescriptionInit | undefined> {
+  async getAnswer(
+    offer: RTCSessionDescriptionInit
+  ): Promise<RTCSessionDescriptionInit | undefined> {
     if (this.peer) {
       await this.peer.setRemoteDescription(offer);
       const ans = await this.peer.createAnswer();
@@ -65,6 +84,15 @@ export default class PeerService {
     }
   }
 
+  // getDataChannel(): RTCDataChannel | undefined {
+  //   if (this.dataChannel && this.dataChannel.readyState === "open") {
+  //     return this.dataChannel;
+  //   } else {
+  //     console.log("Data channel is not available or not open.");
+  //     return undefined;
+  //   }
+  // }
+
   close(): void {
     if (this.peer) {
       // Close peer connection and release resources
@@ -73,4 +101,3 @@ export default class PeerService {
     }
   }
 }
-

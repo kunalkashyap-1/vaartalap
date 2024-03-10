@@ -1,14 +1,12 @@
 "use client";
 import React, { useEffect, useCallback, useState } from "react";
 import ReactPlayer from "react-player";
-import peerService from "../service/peer";
 import { useSocket } from "../components/socketProvider";
 import useVAD from "@/hooks/useVAD";
 import useMediaDevices from "@/hooks/useMediaDevices";
-const peer = new peerService();
 
 const VideoContainer = () => {
-  const { socket, mic, camera } = useSocket();
+  const { socket, mic, camera, peer } = useSocket();
   const [remoteSocketId, setRemoteSocketId] = useState(null);
   const [myStream, setMyStream] = useState<any>();
   const [remoteStream, setRemoteStream] = useState<any>();
@@ -178,9 +176,11 @@ const VideoContainer = () => {
           )}
 
           {/* Caption Display */}
-          {captionText && <div className="absolute bottom-5 left-5 text-white caption bg-black bg-opacity-70 rounded-lg p-2">
-            <p>{captionText}</p>
-          </div>}
+          {captionText && (
+            <div className="absolute bottom-5 left-5 text-white caption bg-black bg-opacity-70 rounded-lg p-2">
+              <p>{captionText}</p>
+            </div>
+          )}
         </div>
 
         <div className="absolute bottom-5 right-5">

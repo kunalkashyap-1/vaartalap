@@ -9,6 +9,7 @@ import {
   SetStateAction,
   useEffect,
 } from "react";
+import peerService from "../service/peer";
 
 import { Socket, io } from "socket.io-client";
 const ENDPOINT = process.env.NEXT_PUBLIC_ENDPOINT ?? "locahost:8383";
@@ -22,7 +23,7 @@ interface ISocketContext {
   caption: boolean;
   setCaption: Dispatch<SetStateAction<boolean>>;
   translate: boolean;
-  setTranslate: Dispatch<SetStateAction<boolean>>;  
+  setTranslate: Dispatch<SetStateAction<boolean>>;
   language: string;
   setLanguage: Dispatch<SetStateAction<string>>;
   // screenShare: boolean;
@@ -41,6 +42,7 @@ interface ISocketContext {
       }[]
     >
   >;
+  peer: peerService;
 }
 
 interface SocketProviderProps {
@@ -57,12 +59,13 @@ const SocketContext = createContext<ISocketContext>({
   setCaption: () => {},
   translate: false,
   setTranslate: () => {},
-  language: "en",
+  language: "default",
   setLanguage: () => {},
   // screenShare: false,
   // setScreenShare: () => {},
   participantList: [],
   setParticipantList: () => {},
+  peer: new peerService(),
 });
 
 export const useSocket = () => {
@@ -75,7 +78,7 @@ export const SocketProvider: FC<SocketProviderProps> = ({ children }) => {
   const [camera, setCamera] = useState(true);
   const [caption, setCaption] = useState(false);
   const [translate, setTranslate] = useState(false);
-  const [language, setLanguage] = useState("");
+  const [language, setLanguage] = useState("default");
   // const [screenShare, setScreenShare] = useState(false);
   const [participantList, setParticipantList] = useState<
     {
@@ -84,6 +87,7 @@ export const SocketProvider: FC<SocketProviderProps> = ({ children }) => {
       roomID: string;
     }[]
   >([]);
+  const peer = new peerService();
 
   useEffect(() => {
     const socketIo = io(ENDPOINT);
@@ -108,8 +112,11 @@ export const SocketProvider: FC<SocketProviderProps> = ({ children }) => {
         // setScreenShare,
         participantList,
         setParticipantList,
-        translate, setTranslate,
-        language, setLanguage,
+        translate,
+        setTranslate,
+        language,
+        setLanguage,
+        peer,
       }}
     >
       {children}

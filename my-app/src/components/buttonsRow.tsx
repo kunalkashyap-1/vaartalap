@@ -32,6 +32,7 @@ const LanguageSelect = ({ language, setLanguage }: any) => (
       value={language}
       onChange={(e) => setLanguage(e.target.value as string)}
     >
+      <MenuItem value="default">Select a language</MenuItem>
       <MenuItem value="en">English</MenuItem>
       <MenuItem value="hi">Hindi</MenuItem>
       <MenuItem value="pl">Polish</MenuItem>
@@ -75,15 +76,15 @@ const MenuContent = ({
   setInfoVisible,
 }: any) => (
   <>
-  <MenuItem
-    onClick={handleClose}
-    sx={{
-      display: "felx",
-      flexDirection: "column",
-    }}
-  >
-    <TranslateSwitch translate={translate} setTranslate={setTranslate}/>
-    {/* <button
+    <MenuItem
+      onClick={handleClose}
+      sx={{
+        display: "felx",
+        flexDirection: "column",
+      }}
+    >
+      <TranslateSwitch translate={translate} setTranslate={setTranslate} />
+      {/* <button
       onClick={() => setIsChat((prevIsChat: boolean) => !prevIsChat)}
       className={`${
         isChat ? "bg-purple-300" : ""
@@ -91,17 +92,17 @@ const MenuContent = ({
     >
       <MessageOutlined />
     </button> */}
-  </MenuItem>
-  <MenuItem
-  onClick={handleClose}
-  sx={{
-    display: "felx",
-    flexDirection: "column",
-  }}
->
-  <LanguageSelect language={language} setLanguage={setLanguage} />
-</MenuItem>
-</>
+    </MenuItem>
+    <MenuItem
+      onClick={handleClose}
+      sx={{
+        display: "felx",
+        flexDirection: "column",
+      }}
+    >
+      <LanguageSelect language={language} setLanguage={setLanguage} />
+    </MenuItem>
+  </>
 );
 
 const ButtonsRow = ({ isChat, setIsChat, isList, setIsList, roomID }: any) => {
@@ -133,9 +134,7 @@ const ButtonsRow = ({ isChat, setIsChat, isList, setIsList, roomID }: any) => {
   }, []);
 
   return (
-    <div
-      className="flex flex-row-reverse justify-between items-center p-4 bg-gray-800"
-    >
+    <div className="flex flex-row-reverse justify-between items-center p-4 bg-gray-800">
       <IconButton
         className="text-white md:hidden"
         aria-label="more"
@@ -172,17 +171,17 @@ const ButtonsRow = ({ isChat, setIsChat, isList, setIsList, roomID }: any) => {
       </Menu>
       <div className="flex justify-center items-center space-x-4">
         <div className="hidden md:flex justify-center items-center gap-2">
-        <TranslateSwitch translate={translate} setTranslate={setTranslate} />
-        <LanguageSelect language={language} setLanguage={setLanguage} />
+          <TranslateSwitch translate={translate} setTranslate={setTranslate} />
+          <LanguageSelect language={language} setLanguage={setLanguage} />
         </div>
-        {/* <button
+        <button
           onClick={() => setIsChat((prevIsChat: boolean) => !prevIsChat)}
           className={`${
             isChat ? "bg-purple-300" : ""
           }  place-content-center text-white rounded-full p-3 hover:bg-opacity-80 transition duration-300`}
         >
           <MessageOutlined />
-        </button> */}
+        </button>
         <button
           onClick={() => setInfoVisible((prev) => !prev)}
           className="text-gray-400"

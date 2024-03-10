@@ -2,8 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-
-.floating { 
+.floating {
   animation-name: floating;
   animation-duration: 2.7s;
   animation-iteration-count: infinite;
@@ -13,8 +12,17 @@
 }
 
 @keyframes floating {
-  0% { transform: translate(0,  0px); }
-  50%  { transform: translate(0, 15px); }
-  100%   { transform: translate(0, -0px); }   
+  0% {
+    transform: translate(0, 0px);
+  }
+  50% {
+    transform: translate(0, 15px);
+  }
+  100% {
+    transform: translate(0, -0px);
+  }
 }
 
+.scrollable-div::-webkit-scrollbar {
+  display: none;
+}

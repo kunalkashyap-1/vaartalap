@@ -26,7 +26,7 @@ const useVAD = (
       formData.append("translate", `${translate}`);
 
       // console.log("Sending audio chunk to API");
-      fetch(`${whisperEndpoint}/api/process/`, {
+      fetch(`${whisperEndpoint}/process_audio`, {
         method: "POST",
         body: formData,
       })
