@@ -38,6 +38,7 @@ const useMediaDevices = (
 
             // Replace the video track in the peer connection
             const senders = peer.peer?.getSenders();
+            console.log(peer.peer);
             const videoSender = senders?.find(
               (sender) => sender.track?.kind === "video"
             );

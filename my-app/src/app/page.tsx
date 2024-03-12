@@ -121,7 +121,7 @@ const Home = () => {
             <Box sx={style} className="flex flex-col gap-4 rounded-2xl">
               <TextField
                 id="outlined-basic"
-                label="Enter Email ID"
+                label="Enter User Name"
                 variant="outlined"
                 type="email"
                 required

@@ -40,7 +40,6 @@ export default class PeerService {
           },
         ],
       });
-
       // Create a data channel named 'chat'
       this.dataChannel = this.peer.createDataChannel("chat");
 
@@ -55,7 +54,6 @@ export default class PeerService {
       this.dataChannel.onerror = (error) => {
         console.log("Data Channel Error:", error);
       };
-
     }
   }
 

@@ -59,7 +59,7 @@ export default function Lobby() {
           id="outlined-basic"
           className="rounded-xl p-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
           type="email"
-          placeholder="Enter Email ID"
+          placeholder="Enter User Name"
           required
           onChange={(e) => {
             setEmail(e.target.value);

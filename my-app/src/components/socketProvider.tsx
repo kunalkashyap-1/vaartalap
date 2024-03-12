@@ -9,7 +9,7 @@ import {
   SetStateAction,
   useEffect,
 } from "react";
-import peerService from "../service/peer";
+// import peerService from "../service/peer";
 
 import { Socket, io } from "socket.io-client";
 const ENDPOINT = process.env.NEXT_PUBLIC_ENDPOINT ?? "locahost:8383";
@@ -42,7 +42,7 @@ interface ISocketContext {
       }[]
     >
   >;
-  peer: peerService;
+  // peer: peerService;
 }
 
 interface SocketProviderProps {
@@ -65,7 +65,7 @@ const SocketContext = createContext<ISocketContext>({
   // setScreenShare: () => {},
   participantList: [],
   setParticipantList: () => {},
-  peer: new peerService(),
+  // peer: new peerService(),
 });
 
 export const useSocket = () => {
@@ -87,7 +87,7 @@ export const SocketProvider: FC<SocketProviderProps> = ({ children }) => {
       roomID: string;
     }[]
   >([]);
-  const peer = new peerService();
+  // const peer = new peerService();
 
   useEffect(() => {
     const socketIo = io(ENDPOINT);
@@ -116,7 +116,7 @@ export const SocketProvider: FC<SocketProviderProps> = ({ children }) => {
         setTranslate,
         language,
         setLanguage,
-        peer,
+        // peer,
       }}
     >
       {children}

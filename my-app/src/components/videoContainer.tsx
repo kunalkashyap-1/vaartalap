@@ -4,9 +4,11 @@ import ReactPlayer from "react-player";
 import { useSocket } from "../components/socketProvider";
 import useVAD from "@/hooks/useVAD";
 import useMediaDevices from "@/hooks/useMediaDevices";
+import peerService from "../service/peer";
+const peer = new peerService();
 
 const VideoContainer = () => {
-  const { socket, mic, camera, peer } = useSocket();
+  const { socket, mic, camera } = useSocket();
   const [remoteSocketId, setRemoteSocketId] = useState(null);
   const [myStream, setMyStream] = useState<any>();
   const [remoteStream, setRemoteStream] = useState<any>();
@@ -113,6 +115,7 @@ const VideoContainer = () => {
       // console.log("GOT TRACKS!!");
       setRemoteStream(remoteStream[0]);
     });
+    console.log(peer.peer?.getSenders());
   }, []);
 
   useEffect(() => {
