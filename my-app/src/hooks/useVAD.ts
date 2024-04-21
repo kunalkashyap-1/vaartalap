@@ -55,7 +55,7 @@ const useVAD = (
           audioChunksRef.current = [];
         });
     }
-  }, [caption]); // Include caption in the dependency array
+  }, [caption]);
 
   useEffect(() => {
     const fftSize = 1024;
@@ -146,7 +146,7 @@ const useVAD = (
         };
       }
     }
-  }, [remoteStream, caption, sendDataToAPI]); // Include caption and sendDataToAPI in the dependency array
+  }, [remoteStream, caption, sendDataToAPI]); 
 };
 
 export default useVAD;

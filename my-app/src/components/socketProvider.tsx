@@ -42,6 +42,8 @@ interface ISocketContext {
       }[]
     >
   >;
+  signTranscribe: boolean;
+  setSignTranscribe: Dispatch<SetStateAction<boolean>>;
   // peer: peerService;
 }
 
@@ -66,6 +68,8 @@ const SocketContext = createContext<ISocketContext>({
   participantList: [],
   setParticipantList: () => {},
   // peer: new peerService(),
+  signTranscribe: false,
+  setSignTranscribe: () => {},
 });
 
 export const useSocket = () => {
@@ -88,6 +92,7 @@ export const SocketProvider: FC<SocketProviderProps> = ({ children }) => {
     }[]
   >([]);
   // const peer = new peerService();
+  const [signTranscribe, setSignTranscribe] = useState(false);
 
   useEffect(() => {
     const socketIo = io(ENDPOINT);
@@ -117,6 +122,8 @@ export const SocketProvider: FC<SocketProviderProps> = ({ children }) => {
         language,
         setLanguage,
         // peer,
+        signTranscribe,
+        setSignTranscribe,
       }}
     >
       {children}

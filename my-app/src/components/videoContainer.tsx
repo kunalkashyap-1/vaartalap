@@ -4,6 +4,7 @@ import ReactPlayer from "react-player";
 import { useSocket } from "../components/socketProvider";
 import useVAD from "@/hooks/useVAD";
 import useMediaDevices from "@/hooks/useMediaDevices";
+import useVideoRec from "@/hooks/useVideoRec";
 import peerService from "../service/peer";
 const peer = new peerService();
 
@@ -35,6 +36,8 @@ const VideoContainer = () => {
     },
     [captionTimer]
   );
+
+  const handleSignTranscribe = useCallback(() => {}, []);
 
   useEffect(() => {
     const fetchStream = async () => {
@@ -89,6 +92,7 @@ const VideoContainer = () => {
 
   useVAD(remoteStream, handleCaptionChange);
   useMediaDevices(mic, camera, myStream, setMyStream, peer);
+  useVideoRec(remoteStream, handleSignTranscribe);
 
   useEffect(() => {
     peer.peer?.addEventListener("negotiationneeded", handleNegoNeeded);

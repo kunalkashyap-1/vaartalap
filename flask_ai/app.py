@@ -6,6 +6,9 @@ import whisper
 from flask_caching import Cache
 from gevent.pywsgi import WSGIServer
 from flask_cors import CORS
+from sign_recorder import SignModel,SignRecorder
+from utils.dataset_utils import load_dataset,load_reference_signs
+from utils.landmark_utils import save_array, extract_landmarks_from_video
 
 app = Flask(__name__)
 CORS(app)
@@ -20,6 +23,10 @@ opus_suffix = ".opus"
 
 # Load the transcription model
 model = whisper.load_model("base")
+# Load reference signs
+videos = load_dataset()
+reference_signs = load_reference_signs(videos)
+sign_recorder = SignRecorder(reference_signs)
 
 # Clean temporary files (called every 5 minutes)
 def clean_tmp():
@@ -28,6 +35,49 @@ def clean_tmp():
         if file.startswith(speech_tts_prefix):
             os.remove(os.path.join(tmp_dir, file))
     print("[Speech REST API] Temporary files cleaned!")
+
+# Utility function to save video locally
+def save_video_locally(video_file):
+    video_path = os.path.join(tempfile.gettempdir(), 'recorded_video.webm')
+    video_file.save(video_path)
+    return video_path
+
+# Utility function to process sign language using the AI model
+def process_sign(landmarks):
+    sign = sign_recorder.process_vid(landmarks)
+    return sign
+
+@app.route('/process_video', methods=['POST'])
+def process_video():
+    # print(request.files['video'])
+    # return jsonify({'sign': "got them vids."})
+
+    try:
+        if 'video' not in request.files:
+            return jsonify({'error': 'No video file provided'}), 400
+
+        video_file = request.files['video']
+        
+        # Save the video file locally
+        video_path = save_video_locally(video_file)
+        
+        # Extract landmarks from the video
+        landmarks = extract_landmarks_from_video(video_path)
+        
+        # Process the sign language gesture
+        sign = process_sign(landmarks)
+        
+        # Remove the video file after processing
+        os.remove(video_path)
+        
+        return jsonify({'sign': sign})
+
+    except Exception as e:
+        error_message = f"An error occurred: {str(e)}"
+        print(e)
+        print(error_message)
+        return jsonify({'error': error_message}), 500
+
 
 # Asynchronous processing using Gevent
 @app.route('/process_audio', methods=['POST'])

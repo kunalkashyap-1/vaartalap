@@ -62,6 +62,22 @@ const TranslateSwitch = ({ translate, setTranslate }: any) => (
   </FormGroup>
 );
 
+const SignSwitch = ({ signTranscribe, setSignTranscribe }: any) => (
+  <FormGroup>
+    <FormControlLabel
+      control={
+        <Switch
+          color="secondary"
+          size="medium"
+          onChange={() => setSignTranscribe((prev: boolean) => !prev)}
+        />
+      }
+      label={<span className="text-purple-600 text-xl">Sign Transcribe</span>}
+      labelPlacement="start"
+    />
+  </FormGroup>
+);
+
 const MenuContent = ({
   isChat,
   translate,
@@ -119,6 +135,8 @@ const ButtonsRow = ({ isChat, setIsChat, isList, setIsList, roomID }: any) => {
     setTranslate,
     language,
     setLanguage,
+    signTranscribe,
+    setSignTranscribe,
   } = useSocket();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -172,6 +190,10 @@ const ButtonsRow = ({ isChat, setIsChat, isList, setIsList, roomID }: any) => {
       <div className="flex justify-center items-center space-x-4">
         <div className="hidden md:flex justify-center items-center gap-2">
           <TranslateSwitch translate={translate} setTranslate={setTranslate} />
+          <SignSwitch
+            signTranscribe={signTranscribe}
+            setSignTranscribe={setSignTranscribe}
+          />
           <LanguageSelect language={language} setLanguage={setLanguage} />
         </div>
         <button
