@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import SendIcon from "@mui/icons-material/Send";
 import {

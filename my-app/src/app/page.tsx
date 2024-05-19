@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import Image from "next/image";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import { useState, useCallback, useEffect } from "react";
