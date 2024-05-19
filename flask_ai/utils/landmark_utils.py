@@ -111,7 +111,7 @@ def extract_landmarks_from_video(video_path):
 
             # Process the frame with MediaPipe Holistic
             image, results = mediapipe_detection(frame, holistic)
-
+            print(results)
             # results = holistic.process(frame_rgb)
 
             # Extract landmarks for left and right hands

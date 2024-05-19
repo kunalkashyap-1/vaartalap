@@ -41,12 +41,17 @@ const VideoContainer = () => {
 
   useEffect(() => {
     const fetchStream = async () => {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true, // Always get the audio track
-        video: true, // Always get the video track
-      });
-      setMyStream(stream);
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: true,
+        });
+        setMyStream(stream);
+      } catch (error) {
+        console.error("Error fetching stream:", error);
+      }
     };
+
     fetchStream();
   }, []);
 
